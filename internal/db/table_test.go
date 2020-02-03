@@ -27,9 +27,9 @@ var _ = Describe("GormDatabase", func() {
 	Describe("Find()", func() {
 		It("returns record matching the query", func() {
 			cluster1 := models.Cluster{Name: "cluster1"}
-			db.Insert(cluster1)
+			db.Insert(&cluster1)
 			cluster2 := models.Cluster{Name: "cluster2"}
-			db.Insert(cluster2)
+			db.Insert(&cluster2)
 
 			result := models.Cluster{}
 			query := Query{
@@ -44,7 +44,7 @@ var _ = Describe("GormDatabase", func() {
 		It("returns error if record not found", func() {
 			result := models.Cluster{}
 			query := Query{
-				Conditions: QueryConditions{"name": "cluster1"},
+				Conditions: QueryConditions{"name": "cluster2"},
 				Result:     &result,
 			}
 			err := table.Find(query)

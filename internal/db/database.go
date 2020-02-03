@@ -6,7 +6,7 @@ import (
 	"github.com/pilly-io/api/internal/models"
 )
 
-type QueryConditions map[string]interface{}
+type QueryConditions = map[string]interface{}
 
 type Query struct {
 	Conditions QueryConditions
