@@ -31,11 +31,10 @@ var _ = Describe("GormDatabase", func() {
 			cluster2 := models.Cluster{Name: "cluster2"}
 			db.Insert(&cluster2)
 
-			result := models.Cluster{}
 			query := Query{
 				Conditions: QueryConditions{"name": "cluster1"},
 			}
-			result, err := table.Find(query)
+			result, _ := table.Find(query)
 
 			Expect(result.Name).To(Equal("cluster1"))
 		})
