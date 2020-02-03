@@ -4,10 +4,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/pilly-io/api/internal/apis"
-	"github.com/pilly-io/api/internal/config"
-	"github.com/pilly-io/api/internal/models"
+	"github.com/pilly-io/api/internal/db"
 	"github.com/sirupsen/logrus"
 	ginlogrus "github.com/toorop/gin-logrus"
 )
@@ -23,17 +21,15 @@ func main() {
 	log := logrus.New()
 	r.Use(ginlogrus.Logger(log), gin.Recovery())
 
-	config.Settings.DB, config.Settings.DBErr = gorm.Open("sqlite3", ":memory")
-	if config.Settings.DBErr != nil {
-		panic(config.Settings.DBErr)
+	database, err := db.New("sqlite3", ":memory:")
+	if err != nil {
+		panic(err)
 	}
-	config.Settings.DB.AutoMigrate(&models.Cluster{})
+	database.Migrate()
 
+	clusters := apis.ClustersHandler{database}
 	v1 := r.Group("/api/v1")
-	{
-		v1.GET("/clusters/:name", apis.GetClusterByName)
-		//v1.GET("/clusters/:id", apis.GetClusterById)
-	}
+	v1.GET("/clusters", clusters.FindAll)
 
 	r.Run()
 }
