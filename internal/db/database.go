@@ -24,7 +24,7 @@ type GormDatabase struct {
 // Database interface
 type Database interface {
 	Migrate()
-	Insert(value interface{})
+	Insert(value interface{}) error
 	Clusters() Table
 }
 
