@@ -34,9 +34,8 @@ var _ = Describe("GormDatabase", func() {
 			result := models.Cluster{}
 			query := Query{
 				Conditions: QueryConditions{"name": "cluster1"},
-				Result:     &result,
 			}
-			table.Find(query)
+			result, err := table.Find(query)
 
 			Expect(result.Name).To(Equal("cluster1"))
 		})
@@ -45,10 +44,10 @@ var _ = Describe("GormDatabase", func() {
 			result := models.Cluster{}
 			query := Query{
 				Conditions: QueryConditions{"name": "cluster2"},
-				Result:     &result,
 			}
-			err := table.Find(query)
+			result, err := table.Find(query)
 			Expect(err).To(HaveOccurred())
+			Expect(result).To(BeNil())
 		})
 	})
 })

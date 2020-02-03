@@ -27,7 +27,7 @@ func main() {
 	}
 	database.Migrate()
 
-	clusters := apis.ClustersHandler{database}
+	clusters := apis.ClustersHandler{db: database}
 	v1 := r.Group("/api/v1")
 	v1.GET("/clusters", clusters.FindAll)
 

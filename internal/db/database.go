@@ -6,13 +6,20 @@ import (
 	"github.com/pilly-io/api/internal/models"
 )
 
+type PaginatedCollection struct {
+	CurrentPage int
+	MaxPage     int
+	TotalCount  int
+	Limit       int
+	Objects     []interface{}
+}
+
 type QueryConditions = map[string]interface{}
 
 type Query struct {
 	Conditions QueryConditions
 	Limit      int
 	OrderBy    string
-	Result     interface{}
 }
 
 // GormDatabase is wrapper for the orm
@@ -34,7 +41,7 @@ func New(driver string, DBURI string) (*GormDatabase, error) {
 	db.LogMode(true)
 	return &GormDatabase{
 		db,
-		NewTable(db),
+		NewTable(db, models.Cluster),
 	}, err
 }
 
