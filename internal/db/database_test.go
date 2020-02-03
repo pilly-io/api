@@ -26,12 +26,12 @@ var _ = Describe("GormDatabase", func() {
 		It("creates a record", func() {
 			var count = 0
 			cluster := models.Cluster{Name: "cluster1"}
-			db.Model(&cluster).Count(&count)
+			db.Model(&models.Cluster{}).Count(&count)
 			Expect(count).To(Equal(0))
 
-			db.Insert(cluster)
+			db.Insert(&cluster)
 
-			db.Model(&cluster).Count(&count)
+			db.Model(&models.Cluster{}).Count(&count)
 			Expect(count).To(Equal(1))
 		})
 	})
