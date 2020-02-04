@@ -1,55 +1,72 @@
 package db
 
 import (
-	"reflect"
+	"math"
 
 	"github.com/jinzhu/gorm"
 )
 
 type Table interface {
-	Find(query Query) (interface{}, error)
-	FindAll(query Query) (*PaginatedCollection, error)
+	Find(query Query, result interface{}) error
+	FindAll(query Query, results interface{}) (*PaginationInfo, error)
 }
 
 type GormTable struct {
 	*gorm.DB
-	kind interface{}
 }
 
 // NewTable : returns a new Table object
-func NewTable(client *gorm.DB, kind interface{}) Table {
-	return &GormTable{client, kind}
+func NewTable(client *gorm.DB) Table {
+	return &GormTable{client}
 }
 
 // Find first object that matches the conditions
-func (table *GormTable) Find(query Query) (interface{}, error) {
-	kind := reflect.TypeOf(table.kind)
-	result := reflect.New(kind).Interface()
-	err := table.Where(query.Conditions).First(&result).Error
-	if err != nil {
-		result = nil
-	}
-	return result, err
+func (table *GormTable) Find(query Query, result interface{}) error {
+	return table.Where(query.Conditions).First(result).Error
 }
 
 // FindAll returns all object matching parameters
-func (table *GormTable) FindAll(query Query) (*PaginatedCollection, error) {
+func (table *GormTable) FindAll(query Query, results interface{}) (*PaginationInfo, error) {
 	count := 0
-	kind := reflect.TypeOf(table.kind)
 
-	results := reflect.New(reflect.SliceOf(kind)).Elem()
-	//results := reflect. MakeSlice(kind, 0, 0)
-	err := table.Where(query.Conditions).Find(&results).Error
+	builder := table.Where(query.Conditions)
+
+	if query.Limit > 0 {
+		builder = builder.Limit(query.Limit)
+	}
+
+	if query.OrderBy != "" {
+		direction := "ASC"
+		if query.Desc {
+			direction = "DESC"
+		}
+		orderBy := query.OrderBy + " " + direction
+		builder = builder.Order(orderBy)
+	}
+
+	if query.Page > 1 {
+		builder = builder.Offset((query.Page - 1) * query.Limit)
+	}
+
+	err := builder.Find(results).Error
 	if err != nil {
 		return nil, err
 	}
 
-	err = table.Model(&table.kind).Where(query.Conditions).Count(&count).Error
+	countBuilder := builder.Limit(nil).Order(nil).Offset(nil)
+	err = countBuilder.Model(results).Count(&count).Error
 	if err != nil {
 		return nil, err
 	}
-	return &PaginatedCollection{
-		Objects:    results.Interface().([]interface{}),
-		TotalCount: count,
+
+	maxPage := 0
+	if query.Limit > 0 {
+		maxPage = int(math.Ceil(float64(count) / float64(query.Limit)))
+	}
+	return &PaginationInfo{
+		TotalCount:  count,
+		Limit:       query.Limit,
+		MaxPage:     maxPage,
+		CurrentPage: query.Page,
 	}, err
 }

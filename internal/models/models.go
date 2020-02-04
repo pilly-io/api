@@ -14,7 +14,7 @@ type Model struct {
 
 type Cluster struct {
 	Model
-	Name     string `gorm:"not null" json:"name"`
+	Name     string `gorm:"unique;not null" json:"name"`
 	Provider string `json:"provider"`
 	Token    string `json:"token"`
 }
