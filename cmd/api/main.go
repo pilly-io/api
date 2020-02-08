@@ -29,7 +29,7 @@ func main() {
 
 	clusters := apis.ClustersHandler{db: database}
 	v1 := r.Group("/api/v1")
-	v1.GET("/clusters", clusters.FindAll)
+	v1.POST("/clusters", clusters.Create)
 
 	r.Run()
 }

@@ -16,5 +16,6 @@ type Cluster struct {
 	Model
 	Name     string `gorm:"unique;not null" json:"name"`
 	Provider string `json:"provider"`
-	Token    string `json:"token"`
+	Region   string `json:"region"`
+	APIToken string `json:"api_token"`
 }

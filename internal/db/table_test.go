@@ -50,6 +50,27 @@ var _ = Describe("GormDatabase", func() {
 		})
 	})
 
+	Describe("Exists()", func() {
+		It("returns true if record exists", func() {
+			cluster1 := models.Cluster{Name: "cluster1"}
+			db.Insert(&cluster1)
+
+			query := Query{
+				Conditions: QueryConditions{"name": cluster1.Name},
+			}
+			exists := table.Exists(query)
+			Expect(exists).To(BeTrue())
+		})
+
+		It("returns false if record not found", func() {
+			query := Query{
+				Conditions: QueryConditions{"name": "cluster2"},
+			}
+			exists := table.Exists(query)
+			Expect(exists).To(BeFalse())
+		})
+	})
+
 	Describe("FindAll()", func() {
 		var (
 			cluster1 models.Cluster

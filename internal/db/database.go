@@ -42,7 +42,7 @@ func New(driver string, DBURI string) (*GormDatabase, error) {
 	db.LogMode(true)
 	return &GormDatabase{
 		db,
-		NewTable(db),
+		NewTable(db, models.Cluster{}),
 	}, err
 }
 

@@ -9,20 +9,35 @@ import (
 type Table interface {
 	Find(query Query, result interface{}) error
 	FindAll(query Query, results interface{}) (*PaginationInfo, error)
+	Exists(query Query) bool
+	Insert(value interface{}) error
 }
 
 type GormTable struct {
 	*gorm.DB
+	kind interface{}
 }
 
 // NewTable : returns a new Table object
-func NewTable(client *gorm.DB) Table {
-	return &GormTable{client}
+func NewTable(client *gorm.DB, kind interface{}) Table {
+	return &GormTable{client, kind}
+}
+
+// Insert creates a new record in the right table
+func (table *GormTable) Insert(value interface{}) error {
+	return table.Create(value).Error
 }
 
 // Find first object that matches the conditions
 func (table *GormTable) Find(query Query, result interface{}) error {
 	return table.Where(query.Conditions).First(result).Error
+}
+
+// Exists check if at least one record exist for this query
+func (table *GormTable) Exists(query Query) bool {
+	count := 0
+	table.Model(table.kind).Where(query.Conditions).Limit(1).Count(&count)
+	return count > 0
 }
 
 // FindAll returns all object matching parameters
