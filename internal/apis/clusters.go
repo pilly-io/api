@@ -1,6 +1,8 @@
 package apis
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
@@ -8,7 +10,7 @@ import (
 
 // Clusters endpoints
 type ClustersHandler struct {
-	db db.Database
+	DB db.Database
 }
 
 // FindAll get all clusters
@@ -28,21 +30,21 @@ type ClustersHandler struct {
 // }
 
 func (handler *ClustersHandler) Create(c *gin.Context) {
-	cluster = models.Cluster{}
+	cluster := models.Cluster{}
 	c.BindJSON(&cluster)
 	query := db.Query{
 		Conditions: db.QueryConditions{"name": cluster.Name},
 	}
 
-	if !handler.db.Clusters().Exists(query) {
-		cluster, err = handler.db.Cluster().Create(cluster.Name)
+	if !handler.DB.Clusters().Exists(query) {
+		_, err := handler.DB.Clusters().Create(cluster.Name, cluster.Provider)
 		if err != nil {
-			// c.JSON(http.StatusCreated, ObjectToJSON(&cluster))
+			c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON("error"))
 		} else {
-			// c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON([err]))
+			c.JSON(http.StatusCreated, ObjectToJSON(&cluster))
 		}
 	} else {
-		// c.JSON(http.StatusConflict, ErrorsToJSON([errors.New("Cluster already exist")]))
+		c.JSON(http.StatusConflict, ErrorsToJSON("error"))
 	}
 
 }

@@ -26,14 +26,14 @@ type Query struct {
 // GormDatabase is wrapper for the orm
 type GormDatabase struct {
 	*gorm.DB
-	clusters Table
+	clusters *ClustersTable
 }
 
 // Database interface
 type Database interface {
 	Migrate()
 	Insert(value interface{}) error
-	Clusters() Table
+	Clusters() *ClustersTable
 }
 
 // New creates an new DB object
@@ -42,7 +42,7 @@ func New(driver string, DBURI string) (*GormDatabase, error) {
 	db.LogMode(true)
 	return &GormDatabase{
 		db,
-		NewTable(db, models.Cluster{}),
+		NewClusterTable(db, models.Cluster{}),
 	}, err
 }
 
@@ -57,6 +57,6 @@ func (db *GormDatabase) Insert(value interface{}) error {
 }
 
 // Clusters returns the clusters Table object
-func (db *GormDatabase) Clusters() Table {
+func (db *GormDatabase) Clusters() *ClustersTable {
 	return db.clusters
 }

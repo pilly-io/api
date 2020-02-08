@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pilly-io/api/internal/apis"
-	"github.com/pilly-io/api/internal/db"
+	idb "github.com/pilly-io/api/internal/db"
 	"github.com/sirupsen/logrus"
 	ginlogrus "github.com/toorop/gin-logrus"
 )
@@ -21,13 +21,13 @@ func main() {
 	log := logrus.New()
 	r.Use(ginlogrus.Logger(log), gin.Recovery())
 
-	database, err := db.New("sqlite3", ":memory:")
+	database, err := idb.New("sqlite3", ":memory:")
 	if err != nil {
 		panic(err)
 	}
 	database.Migrate()
 
-	clusters := apis.ClustersHandler{db: database}
+	clusters := apis.ClustersHandler{DB: database}
 	v1 := r.Group("/api/v1")
 	v1.POST("/clusters", clusters.Create)
 

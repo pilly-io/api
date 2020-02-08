@@ -3,9 +3,9 @@ package apis
 type jsonFormat = map[string]interface{}
 
 // ErrorsToJSON returns JSON format for multiple errors
-func ErrorsToJSON(errors []error) map[string]interface{} {
+func ErrorsToJSON(object interface{}) map[string]interface{} {
 	return jsonFormat{
-		"errors": errors,
+		"errors": "errors",
 	}
 }
 
@@ -15,14 +15,14 @@ func ObjectToJSON(object interface{}) map[string]interface{} {
 	}
 }
 
-func ObjectsToJSON(collection db.PaginatedCollection) map[string]interface{} {
+/*func ObjectsToJSON(collection db.PaginationInfo) map[string]interface{} {
 	return jsonFormat{
 		"data": collection.Objects,
 		"pagination": {
-			"current": collection.CurrentPage,
-			"limit": collection.Limit,
-			"max_page": collection.MaxPage,
+			"current":     collection.CurrentPage,
+			"limit":       collection.Limit,
+			"max_page":    collection.MaxPage,
 			"total_count": collection.TotalCount,
-		}
+		},
 	}
-}
+}*/
