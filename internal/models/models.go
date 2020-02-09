@@ -14,8 +14,22 @@ type Model struct {
 
 type Cluster struct {
 	Model
-	Name     string `gorm:"unique;not null" json:"name"`
-	Provider string `json:"provider"`
-	Region   string `json:"region"`
-	APIToken string `json:"api_token"`
+	Name       string `gorm:"unique;not null" json:"name"`
+	Provider   string `json:"provider"`
+	Region     string `json:"region"`
+	APIToken   string `json:"api_token"`
+	NodesCount int    `json:"nodes_count"`
+}
+
+type Node struct {
+	Model
+	InstanceType      string            `json:"instance_type"`
+	Region            string            `json:"region"`
+	Zone              string            `json:"zone"`
+	Hostname          string            `json:"hostname"`
+	UID               string            `json:"uid"`
+	KubernetesVersion string            `json:"kubernetes_version"`
+	OS                string            `json:"os"`
+	ClusterID         int               `json:"cluster_id"`
+	Labels            map[string]string `json:"labels"`
 }

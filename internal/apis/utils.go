@@ -14,6 +14,10 @@ func SetupRouter(r *gin.Engine, database *db.GormDatabase) {
 	clusters := ClustersHandler{DB: database}
 	v1 := r.Group("/api/v1")
 	v1.POST("/clusters", clusters.Create)
+
+	collector := r.Group("/api/v1/collector")
+	nodes := NodesHandler{DB: database}
+	collector.POST("/nodes", nodes.Sync)
 }
 
 // ErrorsToJSON returns JSON format for multiple errors

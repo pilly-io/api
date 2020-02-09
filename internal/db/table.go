@@ -11,6 +11,7 @@ type Table interface {
 	FindAll(query Query, results interface{}) (*PaginationInfo, error)
 	Exists(query Query) bool
 	Insert(value interface{}) error
+	//Create(value interface{}) error
 }
 
 type GormTable struct {

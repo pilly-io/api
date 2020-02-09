@@ -21,7 +21,7 @@ func main() {
 	log := logrus.New()
 	r.Use(ginlogrus.Logger(log), gin.Recovery())
 
-	database, err := idb.New("sqlite3", ":memory:")
+	database, err := idb.New("sqlite3", "/tmp/pilly.sqlite")
 	if err != nil {
 		panic(err)
 	}
