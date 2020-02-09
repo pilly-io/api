@@ -1,7 +1,9 @@
 package apis
 
-import "github.com/pilly-io/api/internal/db"
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/pilly-io/api/internal/db"
+)
 
 type jsonFormat = map[string]interface{}
 
