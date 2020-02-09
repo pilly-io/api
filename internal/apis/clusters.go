@@ -8,27 +8,12 @@ import (
 	"github.com/pilly-io/api/internal/models"
 )
 
-// Clusters endpoints
+// ClustersHandler definition
 type ClustersHandler struct {
 	DB db.Database
 }
 
-// FindAll get all clusters
-// func (handler *ClustersHandler) FindAll(c *gin.Context) {
-// 	clusters := []*models.Cluster{}
-// 	query := db.Query{
-// 		Result: &clusters,
-// 	}
-// 	err := handler.db.Clusters().FindAll(query)
-
-// 	if err != nil {
-// 		log.Errorf("Cannot retrieve the clusters: %s", err)
-// 		c.AbortWithStatus(http.StatusNotFound)
-// 	} else {
-// 		c.JSON(http.StatusOK, clusters)
-// 	}
-// }
-
+// Create a cluster if not exists
 func (handler *ClustersHandler) Create(c *gin.Context) {
 	cluster := models.Cluster{}
 	c.BindJSON(&cluster)

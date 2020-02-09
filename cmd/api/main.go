@@ -26,10 +26,6 @@ func main() {
 		panic(err)
 	}
 	database.Migrate()
-
-	clusters := apis.ClustersHandler{DB: database}
-	v1 := r.Group("/api/v1")
-	v1.POST("/clusters", clusters.Create)
-
+	apis.SetupRouter(r, database)
 	r.Run()
 }
