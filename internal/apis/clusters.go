@@ -22,7 +22,7 @@ func (handler *ClustersHandler) Create(c *gin.Context) {
 	}
 
 	if !handler.DB.Clusters().Exists(query) {
-		_, err := handler.DB.Clusters().Create(cluster.Name, cluster.Provider)
+		cluster, err := handler.DB.Clusters().Create(cluster.Name, cluster.Provider)
 		if err != nil {
 			c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON("error"))
 		} else {
