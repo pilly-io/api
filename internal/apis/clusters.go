@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,12 +25,12 @@ func (handler *ClustersHandler) Create(c *gin.Context) {
 	if !handler.DB.Clusters().Exists(query) {
 		cluster, err := handler.DB.Clusters().Create(cluster.Name, cluster.Provider)
 		if err != nil {
-			c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON("error"))
+			c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON(err))
 		} else {
 			c.JSON(http.StatusCreated, ObjectToJSON(&cluster))
 		}
 	} else {
-		c.JSON(http.StatusConflict, ErrorsToJSON("error"))
+		c.JSON(http.StatusConflict, ErrorsToJSON(errors.New("already_exist")))
 	}
 
 }

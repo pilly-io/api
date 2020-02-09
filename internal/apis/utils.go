@@ -15,12 +15,17 @@ func SetupRouter(r *gin.Engine, database *db.GormDatabase) {
 }
 
 // ErrorsToJSON returns JSON format for multiple errors
-func ErrorsToJSON(object interface{}) map[string]interface{} {
+func ErrorsToJSON(errors ...error) map[string]interface{} {
+	var errorsString []string
+	for _, e := range errors {
+		errorsString = append(errorsString, e.Error())
+	}
 	return jsonFormat{
-		"errors": "errors",
+		"errors": errorsString,
 	}
 }
 
+//ObjectToJSON returns JSON format for the data
 func ObjectToJSON(object interface{}) map[string]interface{} {
 	return jsonFormat{
 		"data": object,
