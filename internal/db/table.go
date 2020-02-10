@@ -12,6 +12,7 @@ type Table interface {
 	FindAll(query Query, results interface{}) (*PaginationInfo, error)
 	Exists(query Query) bool
 	Insert(value interface{}) error
+	Count(query Query) int
 	//Create(value interface{}) error
 }
 
@@ -40,6 +41,13 @@ func (table *GormTable) Exists(query Query) bool {
 	count := 0
 	table.Model(table.kind).Where(query.Conditions).Limit(1).Count(&count)
 	return count > 0
+}
+
+// Count returns the number of record matching query
+func (table *GormTable) Count(query Query) int {
+	count := 0
+	table.Model(table.kind).Where(query.Conditions).Count(&count)
+	return count
 }
 
 // FindAll returns all object matching parameters

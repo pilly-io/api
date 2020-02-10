@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pilly-io/api/internal/apis/middlewares"
 	"github.com/pilly-io/api/internal/db"
 )
 
@@ -20,6 +21,7 @@ func SetupRouter(r *gin.Engine, database *db.GormDatabase) {
 	v1.GET("/clusters/:id/owners/metrics", metrics.List)
 
 	collector := r.Group("/api/v1/collector")
+	collector.Use(middlewares.CluserAuthMiddleware(database.Clusters()))
 	nodes := NodesHandler{DB: database}
 	collector.POST("/nodes", nodes.Sync)
 }

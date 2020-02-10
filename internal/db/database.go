@@ -66,7 +66,7 @@ func New(driver string, DBURI string) (*GormDatabase, error) {
 // Migrate sync the schemas of the DB
 func (db *GormDatabase) Migrate() {
 	//db.AutoMigrate(&models.Cluster{}, &models.Node{}, &models.Namespace{}, &models.Owner{}, models.Metric{})
-	db.AutoMigrate(&models.Cluster{}, &models.Owner{}, models.Metric{})
+	db.AutoMigrate(&models.Cluster{}, &models.Node{}, &models.Owner{}, models.Metric{})
 }
 
 // Insert creates a new record in the right table

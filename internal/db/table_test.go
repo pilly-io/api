@@ -151,4 +151,25 @@ var _ = Describe("GormDatabase", func() {
 			Expect(err).To(HaveOccurred())
 		})
 	})
+
+	Describe("Count()", func() {
+		It("returns number of records that match query", func() {
+			cluster1 := models.Cluster{Name: "cluster1"}
+			db.Insert(&cluster1)
+
+			query := Query{
+				Conditions: QueryConditions{"name": cluster1.Name},
+			}
+			count := table.Count(query)
+			Expect(count).To(Equal(1))
+		})
+
+		It("returns 0 if no records match", func() {
+			query := Query{
+				Conditions: QueryConditions{"name": "cluster2"},
+			}
+			count := table.Count(query)
+			Expect(count).To(Equal(0))
+		})
+	})
 })

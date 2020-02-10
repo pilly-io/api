@@ -1,0 +1,3 @@
+tests:
+	source .test.env
+	go test ./...

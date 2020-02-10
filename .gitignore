@@ -17,3 +17,6 @@ cmd/api/api
 
 # Ignore vscode workspace
 api.code-workspace
+
+.test.env
+.env
