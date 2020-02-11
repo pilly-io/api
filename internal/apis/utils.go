@@ -38,7 +38,14 @@ func ObjectToJSON(object interface{}) map[string]interface{} {
 	}
 }
 
-/*func ObjectsToJSON(collection db.PaginationInfo) map[string]interface{} {
+//ObjectsToJSON returns JSON format for the list of data
+func ObjectsToJSON(objects ...interface{}) map[string]interface{} {
+	return jsonFormat{
+		"data": objects,
+	}
+}
+
+/*func PaginatedObjectsToJSON(collection db.PaginationInfo) map[string]interface{} {
 	return jsonFormat{
 		"data": collection.Objects,
 		"pagination": {
