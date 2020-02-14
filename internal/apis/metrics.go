@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pilly-io/api/internal/db"
@@ -39,8 +40,8 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_end")))
 		return false
 	}
-	c.Set("Start", start)
-	c.Set("End", end)
+	c.Set("Start", *start)
+	c.Set("End", *end)
 	return true
 }
 
@@ -52,29 +53,23 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 	if !handler.ValidateRequest(c) {
 		return
 	}
-	start, _ := c.Get("Start")
-	end, _ := c.Get("End")
-	clusterID, _ := c.Get("clusterID")
+	itStart, _ := c.Get("Start")
+	itEnd, _ := c.Get("End")
+	start, _ := itStart.(time.Time)
+	end, _ := itEnd.(time.Time)
+	clusterID := c.Param("id")
 	period, err := strconv.ParseInt(c.Query("period"), 10, 64)
 	if err != nil || period < MinPeriod {
 		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_period")))
 		return
 	}
 	//2. Get the owners within the interval
-	handler.DB.Owners().Raw(`
-		SELECT *
-		FROM owners
-		WHERE
-			cluster_id = ?
-		AND
-			created_at <= ?
-		AND
-			(deleted_at IS NULL OR deleted_at >= ?"`, clusterID, end, end).Scan(&owners)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON(err))
-		return
+	query := db.Query{
+		Conditions: db.QueryConditions{"cluster_id": clusterID},
+		Interval:   &db.QueryInterval{Start: start, End: end},
 	}
+	handler.DB.Owners().FindAll(query, &owners)
 	//3. Get the metrics within the interval grouped by period
 	fmt.Println(period)
-	fmt.Println(start)
+	c.JSON(http.StatusOK, ObjectToJSON(&owners))
 }

@@ -51,10 +51,10 @@ type Metric struct {
 
 type Owner struct {
 	Model
-	UID       string            `json:"uid"`
-	Name      string            `json:"name"`
-	Type      string            `json:"type"`
-	Namespace string            `json:"namespace"`
-	Labels    map[string]string `json:"labels"`
-	ClusterID int               `json:"cluster_id"`
+	UID       string `json:"uid"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
+	Namespace string `json:"namespace"`
+	Labels    string `json:"labels"`
+	ClusterID int    `json:"cluster_id"`
 }

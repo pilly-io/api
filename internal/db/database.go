@@ -1,6 +1,8 @@
 package db
 
 import (
+	"time"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pilly-io/api/internal/models"
@@ -15,8 +17,14 @@ type PaginationInfo struct {
 
 type QueryConditions = map[string]interface{}
 
+type QueryInterval struct {
+	Start time.Time
+	End   time.Time
+}
+
 type Query struct {
 	Conditions QueryConditions
+	Interval   *QueryInterval
 	Limit      int
 	OrderBy    string
 	Desc       bool
@@ -57,7 +65,8 @@ func New(driver string, DBURI string) (*GormDatabase, error) {
 
 // Migrate sync the schemas of the DB
 func (db *GormDatabase) Migrate() {
-	db.AutoMigrate(&models.Cluster{})
+	//db.AutoMigrate(&models.Cluster{}, &models.Node{}, &models.Namespace{}, &models.Owner{}, models.Metric{})
+	db.AutoMigrate(&models.Cluster{}, &models.Owner{}, models.Metric{})
 }
 
 // Insert creates a new record in the right table

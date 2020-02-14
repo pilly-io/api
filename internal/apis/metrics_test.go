@@ -2,6 +2,7 @@ package apis
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 
@@ -142,6 +143,26 @@ var _ = Describe("Owners", func() {
 	})
 	Describe("ListMetrics() succeeds", func() {
 		It("Should return a 200 without the metrics of all the cluster", func() {
+			var payload jsonFormat
+			res := httptest.NewRecorder()
+			cluster1 := models.Cluster{Name: "cluster1"}
+			database.Insert(&cluster1)
+
+			//1. Create the GET request
+			req, _ := http.NewRequest("GET", "/api/v1/clusters/1/owners/metrics", nil)
+			q := req.URL.Query()
+			q.Add("start", "1000")
+			q.Add("end", "10000000000")
+			q.Add("period", "60")
+			req.URL.RawQuery = q.Encode()
+			engine.ServeHTTP(res, req)
+
+			//2. Analyse the result
+			Expect(res.Code).To(Equal(200))
+			json.Unmarshal(res.Body.Bytes(), &payload)
+			data := payload["data"].([]interface{})
+			fmt.Println(data)
+			Expect(data).ToNot(BeNil())
 		})
 		It("Should return a 200 without the metrics of a namespace", func() {
 		})
