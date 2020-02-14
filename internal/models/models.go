@@ -33,3 +33,28 @@ type Node struct {
 	ClusterID         int               `json:"cluster_id"`
 	Labels            map[string]string `json:"labels"`
 }
+
+type Namespace struct {
+	Model
+	Name      string            `json:"name"`
+	Labels    map[string]string `json:"labels"`
+	ClusterID int               `json:"cluster_id"`
+}
+
+type Metrics struct {
+	Model
+	Name      string `json:"metric_name"`
+	Value     string `json:"metric_value"`
+	OwnerUID  string `json:"owner_uid"`
+	ClusterID int    `json:"cluster_id"`
+}
+
+type Owners struct {
+	Model
+	UID       string            `json:"uid"`
+	Name      string            `json:"name"`
+	Type      string            `json:"type"`
+	Namespace string            `json:"namespace"`
+	Labels    map[string]string `json:"labels"`
+	ClusterID int               `json:"cluster_id"`
+}
