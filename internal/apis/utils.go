@@ -24,11 +24,14 @@ func SetupRouter(r *gin.Engine, database *db.GormDatabase) {
 	collector.POST("/nodes", nodes.Sync)
 }
 
-// ConvertStringToTime : convert a string to a time
-func ConvertStringToTime(str string) (time.Time, error) {
-	toInt, err := strconv.ParseInt(str, 10, 64)
+// ConvertTimestampToTime : convert a ts to a time
+func ConvertTimestampToTime(ts string) (*time.Time, error) {
+	toInt, err := strconv.ParseInt(ts, 10, 64)
+	if err != nil {
+		return nil, err
+	}
 	toTime := time.Unix(int64(toInt), 0)
-	return toTime, err
+	return &toTime, err
 }
 
 // ErrorsToJSON returns JSON format for multiple errors

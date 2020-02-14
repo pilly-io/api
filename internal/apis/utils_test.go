@@ -24,4 +24,16 @@ var _ = Describe("Utils", func() {
 			Expect(payload["data"]).To(Equal(clusters))
 		})
 	})
+	Describe("ConvertTimestampToTime()", func() {
+		It("Should return a valid time", func() {
+			t1, err := ConvertTimestampToTime("0")
+			Expect(err).To(BeNil())
+			Expect(t1.UTC().String()).To(Equal("1970-01-01 00:00:00 +0000 UTC"))
+		})
+		It("Should fails", func() {
+			t1, err := ConvertTimestampToTime("error")
+			Expect(err).ToNot(BeNil())
+			Expect(t1).To(BeNil())
+		})
+	})
 })
