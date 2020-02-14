@@ -12,9 +12,12 @@ type jsonFormat = map[string]interface{}
 // SetupRouter binds all the routes to their handlers
 func SetupRouter(r *gin.Engine, database *db.GormDatabase) {
 	clusters := ClustersHandler{DB: database}
+	owners := OwnersHandler{DB: database}
 	v1 := r.Group("/api/v1")
 	v1.POST("/clusters", clusters.Create)
 	v1.GET("/clusters", clusters.List)
+	v1.GET("/clusters/:id/owners/metrics", owners.ListMetrics)
+	v1.GET("/clusters/:id/owners/usage", owners.Usage)
 
 	collector := r.Group("/api/v1/collector")
 	nodes := NodesHandler{DB: database}

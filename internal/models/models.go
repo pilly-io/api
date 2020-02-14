@@ -41,7 +41,7 @@ type Namespace struct {
 	ClusterID int               `json:"cluster_id"`
 }
 
-type Metrics struct {
+type Metric struct {
 	Model
 	Name      string `json:"metric_name"`
 	Value     string `json:"metric_value"`
@@ -49,7 +49,7 @@ type Metrics struct {
 	ClusterID int    `json:"cluster_id"`
 }
 
-type Owners struct {
+type Owner struct {
 	Model
 	UID       string            `json:"uid"`
 	Name      string            `json:"name"`

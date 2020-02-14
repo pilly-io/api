@@ -28,6 +28,8 @@ type GormDatabase struct {
 	*gorm.DB
 	clusters *ClustersTable
 	nodes    Table
+	metrics  *MetricsTable
+	owners   *OwnersTable
 }
 
 // Database interface
@@ -36,6 +38,8 @@ type Database interface {
 	Insert(value interface{}) error
 	Clusters() *ClustersTable
 	Nodes() Table
+	Metrics() *MetricsTable
+	Owners() *OwnersTable
 }
 
 // New creates an new DB object
@@ -46,6 +50,8 @@ func New(driver string, DBURI string) (*GormDatabase, error) {
 		db,
 		NewClusterTable(db, models.Cluster{}),
 		NewTable(db, models.Node{}),
+		NewMetricsTable(db, models.Metric{}),
+		NewOwnersTable(db, models.Owner{}),
 	}, err
 }
 
@@ -67,4 +73,14 @@ func (db *GormDatabase) Clusters() *ClustersTable {
 // Nodes returns the nodes Table object
 func (db *GormDatabase) Nodes() Table {
 	return db.nodes
+}
+
+// Metrics returns the metrics Table object
+func (db *GormDatabase) Metrics() *MetricsTable {
+	return db.metrics
+}
+
+// Owners returns the owners Table object
+func (db *GormDatabase) Owners() *OwnersTable {
+	return db.owners
 }
