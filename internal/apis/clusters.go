@@ -37,21 +37,13 @@ func (handler *ClustersHandler) Create(c *gin.Context) {
 
 // List all the existing clusters
 func (handler *ClustersHandler) List(c *gin.Context) {
-	cluster := models.Cluster{}
-	c.BindJSON(&cluster)
-	query := db.Query{
-		Conditions: db.QueryConditions{"name": cluster.Name},
-	}
+	var clusters []models.Cluster
+	query := db.Query{}
 
-	if !handler.DB.Clusters().Exists(query) {
-		cluster, err := handler.DB.Clusters().Create(cluster.Name, cluster.Provider)
-		if err != nil {
-			c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON(err))
-		} else {
-			c.JSON(http.StatusCreated, ObjectToJSON(&cluster))
-		}
+	_, err := handler.DB.Clusters().FindAll(query, &clusters)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON(err))
 	} else {
-		c.JSON(http.StatusConflict, ErrorsToJSON(errors.New("already_exist")))
+		c.JSON(http.StatusOK, ObjectToJSON(&clusters))
 	}
-
 }

@@ -14,6 +14,7 @@ func SetupRouter(r *gin.Engine, database *db.GormDatabase) {
 	clusters := ClustersHandler{DB: database}
 	v1 := r.Group("/api/v1")
 	v1.POST("/clusters", clusters.Create)
+	v1.GET("/clusters", clusters.List)
 
 	collector := r.Group("/api/v1/collector")
 	nodes := NodesHandler{DB: database}
@@ -38,14 +39,7 @@ func ObjectToJSON(object interface{}) map[string]interface{} {
 	}
 }
 
-//ObjectsToJSON returns JSON format for the list of data
-func ObjectsToJSON(objects ...interface{}) map[string]interface{} {
-	return jsonFormat{
-		"data": objects,
-	}
-}
-
-/*func PaginatedObjectsToJSON(collection db.PaginationInfo) map[string]interface{} {
+/*func PaginatedObjectToJSON(collection db.PaginationInfo) map[string]interface{} {
 	return jsonFormat{
 		"data": collection.Objects,
 		"pagination": {
