@@ -22,13 +22,12 @@ func TestNodesHandler(t *testing.T) {
 
 var _ = Describe("NodesHandler", func() {
 	var (
-		//handler *ClustersHandler
 		engine   *gin.Engine
-		database *db.GormDatabase
+		database db.Database
 		cluster  *models.Cluster
 	)
 	BeforeEach(func() {
-		database := tests.SetupDB()
+		database = tests.SetupDB()
 		gin.SetMode(gin.TestMode)
 		engine = gin.New()
 		SetupRouter(engine, database)

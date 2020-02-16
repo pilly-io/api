@@ -36,7 +36,7 @@ type Query struct {
 type GormDatabase struct {
 	*gorm.DB
 	clusters *ClustersTable
-	nodes    Table
+	Node     Table
 	metrics  *MetricsTable
 	owners   *OwnersTable
 }
@@ -89,7 +89,7 @@ func (db *GormDatabase) Clusters() *ClustersTable {
 
 // Nodes returns the nodes Table object
 func (db *GormDatabase) Nodes() Table {
-	return db.nodes
+	return db.Node
 }
 
 // Metrics returns the metrics Table object
@@ -102,7 +102,7 @@ func (db *GormDatabase) Owners() *OwnersTable {
 	return db.owners
 }
 
-// Truncate remove all records from all tables
+// Flush remove all records from all tables
 func (db *GormDatabase) Flush() {
 	for _, model := range getAllModels() {
 		db.Unscoped().Delete(model)
