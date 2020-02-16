@@ -40,23 +40,23 @@ type Namespace struct {
 	Model
 	Name      string            `json:"name"`
 	Labels    map[string]string `json:"labels"`
-	ClusterID int               `json:"cluster_id"`
+	ClusterID uint              `json:"cluster_id"`
 }
 
 type Metric struct {
 	Model
-	Name      string `json:"metric_name"`
-	Value     string `json:"metric_value"`
-	OwnerUID  string `json:"owner_uid"`
-	ClusterID int    `json:"cluster_id"`
+	Name      string  `json:"metric_name"`
+	Value     float64 `json:"metric_value"`
+	OwnerUID  string  `json:"owner_uid"`
+	ClusterID uint    `json:"cluster_id"`
 }
 
 type Owner struct {
 	Model
-	UID       string `json:"uid"`
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	Namespace string `json:"namespace"`
-	Labels    string `json:"labels"`
-	ClusterID int    `json:"cluster_id"`
+	UID       string         `json:"uid"`
+	Name      string         `json:"name"`
+	Type      string         `json:"type"`
+	Namespace string         `json:"namespace"`
+	Labels    postgres.Jsonb `json:"labels"`
+	ClusterID uint           `json:"cluster_id"`
 }

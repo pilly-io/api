@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/jinzhu/gorm"
@@ -57,8 +56,6 @@ func (table *GormTable) FindAll(query Query, results interface{}) (*PaginationIn
 	builder := table.Where(query.Conditions)
 
 	if query.Interval != nil {
-		fmt.Println(query.Interval.Start)
-		fmt.Println(query.Interval.End)
 		builder = builder.Unscoped()
 		builder = builder.Where("created_at <= ?", query.Interval.End)
 		builder = builder.Where("deleted_at IS NULL OR deleted_at >= ?", query.Interval.Start)

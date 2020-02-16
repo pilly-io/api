@@ -15,9 +15,9 @@ import (
 	"github.com/pilly-io/api/internal/tests"
 )
 
-func TestRunner(t *testing.T) {
+func TestClustersHandler(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "API Suite")
+	RunSpecs(t, "ClustersHandler Suite")
 }
 
 var _ = Describe("Clusters", func() {

@@ -1,4 +1,4 @@
 include .test.env
 
 tests:
-	go test $(DIR)
+	go test -v $(DIR)
