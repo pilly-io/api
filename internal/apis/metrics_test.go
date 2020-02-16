@@ -24,14 +24,16 @@ func TestMetricsHandler(t *testing.T) {
 
 //MetricsFactory: create a metric given an owner/cluster
 func MetricsFactory(database db.Database, clusterID uint, ownerUID string, name string, value float64, createdAt time.Time) *models.Metric {
-	metrics := &models.Metric{
+	metric := &models.Metric{
 		ClusterID: clusterID,
 		OwnerUID:  ownerUID,
 		Name:      name,
 		Value:     value,
 	}
-	metrics.Model.CreatedAt = createdAt
-	return metrics
+	metric.Model.CreatedAt = createdAt
+	fmt.Println(createdAt)
+	database.Metrics().Insert(&metric)
+	return metric
 }
 
 //VeryOldOwner : create an owner and generate its metrics, will create a factory if needed
@@ -51,26 +53,26 @@ func VeryOldOwner(database db.Database, clusterID uint) (*models.Owner, []*model
 	// TODO convert into a []{}
 	//1. Generate CPU metrics
 	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPUUsed, 1, past))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPUUsed, 1, past.Add(60)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPUUsed, 2, past.Add(120)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPUUsed, 2, past.Add(180)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPUUsed, 1, past.Add(240)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPUUsed, 1, past.Add(time.Minute*1)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPUUsed, 2, past.Add(time.Minute*2)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPUUsed, 2, past.Add(time.Minute*3)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPUUsed, 1, past.Add(time.Minute*4)))
 	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPURequested, 2, past))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPURequested, 2, past.Add(60)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPURequested, 2, past.Add(120)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPURequested, 2, past.Add(180)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPURequested, 2, past.Add(240)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPURequested, 2, past.Add(time.Minute*1)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPURequested, 2, past.Add(time.Minute*2)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPURequested, 2, past.Add(time.Minute*3)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricCPURequested, 2, past.Add(time.Minute*4)))
 	//2. Generate Memory metrics
 	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryUsed, 1024, past))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryUsed, 1024, past.Add(60)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryUsed, 2048, past.Add(120)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryUsed, 2048, past.Add(180)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryUsed, 1024, past.Add(240)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryUsed, 1024, past.Add(time.Minute*1)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryUsed, 2048, past.Add(time.Minute*2)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryUsed, 2048, past.Add(time.Minute*3)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryUsed, 1024, past.Add(time.Minute*4)))
 	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryRequested, 2048, past))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryRequested, 2048, past.Add(60)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryRequested, 2048, past.Add(120)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryRequested, 2048, past.Add(180)))
-	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryRequested, 2048, past.Add(240)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryRequested, 2048, past.Add(time.Minute*1)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryRequested, 2048, past.Add(time.Minute*2)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryRequested, 2048, past.Add(time.Minute*3)))
+	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, MetricMemoryRequested, 2048, past.Add(time.Minute*4)))
 	return owner, metrics
 }
 
@@ -209,16 +211,14 @@ var _ = Describe("Owners", func() {
 			q := req.URL.Query()
 			q.Add("start", "1000")
 			q.Add("end", fmt.Sprintf("%d", now))
-			q.Add("period", "60")
+			q.Add("period", "180")
 			req.URL.RawQuery = q.Encode()
 			engine.ServeHTTP(res, req)
 
-			fmt.Println(res)
 			//3. Analyse the result
 			Expect(res.Code).To(Equal(200))
 			json.Unmarshal(res.Body.Bytes(), &payload)
 			data := payload["data"].([]interface{})
-			fmt.Println(data)
 			Expect(data).ToNot(BeEmpty())
 		})
 		It("Should return a 200 without the metrics of a namespace", func() {

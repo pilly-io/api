@@ -45,10 +45,11 @@ type Namespace struct {
 
 type Metric struct {
 	Model
-	Name      string  `json:"metric_name"`
-	Value     float64 `json:"metric_value"`
-	OwnerUID  string  `json:"owner_uid"`
-	ClusterID uint    `json:"cluster_id"`
+	Name      string    `json:"metric_name"`
+	Value     float64   `json:"metric_value"`
+	OwnerUID  string    `json:"owner_uid"`
+	ClusterID uint      `json:"cluster_id"`
+	Period    time.Time `gorm:"-"`
 }
 
 type Owner struct {

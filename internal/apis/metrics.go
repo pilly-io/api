@@ -2,6 +2,7 @@ package apis
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -48,8 +49,8 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 
 // List the metrics of the cluster within an interval
 func (handler *MetricsHandler) List(c *gin.Context) {
-	var owners []*models.Owner
-	var metrics []*models.Metric
+	var owners []models.Owner
+	//var metrics []models.Metric
 	// 1. Check sanity of the request
 	if !handler.ValidateRequest(c) {
 		return
@@ -68,7 +69,18 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 		Interval:   &db.QueryInterval{Start: start, End: end},
 	}
 	handler.DB.Owners().FindAll(query, &owners)
-	handler.DB.Metrics().FindAll(query, &metrics)
+	ownerUIDs := GetOwnerUIDs(&owners)
+	metrics, _ := handler.DB.Metrics().FindAll(uint(period), *ownerUIDs)
+	fmt.Println(metrics)
 	//3. Get the metrics within the interval grouped by period
 	c.JSON(http.StatusOK, ObjectToJSON(&owners))
+}
+
+//GetOwnerUIDs : given a list of owners, retrieve their UID
+func GetOwnerUIDs(owners *[]models.Owner) *[]string {
+	keys := make([]string, len(*owners))
+	for i, o := range *owners {
+		keys[i] = o.UID
+	}
+	return &keys
 }
