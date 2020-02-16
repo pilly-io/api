@@ -1,3 +1,4 @@
+include .test.env
+
 tests:
-	source .test.env
-	go test ./...
+	go test $(DIR)

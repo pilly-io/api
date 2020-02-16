@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
+	"github.com/pilly-io/api/internal/tests"
 )
 
 func TestRunner(t *testing.T) {
@@ -23,14 +24,17 @@ var _ = Describe("Clusters", func() {
 	var (
 		//handler *ClustersHandler
 		engine   *gin.Engine
-		database *db.GormDatabase
+		database db.Database
 	)
 	BeforeEach(func() {
-		database, _ = db.New("sqlite3", ":memory:")
-		database.Migrate()
+		database = tests.SetupDB()
 		gin.SetMode(gin.TestMode)
 		engine = gin.New()
 		SetupRouter(engine, database)
+	})
+
+	AfterEach(func() {
+		database.Flush()
 	})
 
 	Describe("Create()", func() {

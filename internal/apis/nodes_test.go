@@ -28,12 +28,15 @@ var _ = Describe("NodesHandler", func() {
 		cluster  *models.Cluster
 	)
 	BeforeEach(func() {
-		database, _ = db.New("sqlite3", ":memory:")
-		database.Migrate()
+		database := tests.SetupDB()
 		gin.SetMode(gin.TestMode)
 		engine = gin.New()
 		SetupRouter(engine, database)
 		cluster, _ = database.Clusters().Create("test", "aws")
+	})
+
+	AfterEach(func() {
+		database.Flush()
 	})
 
 	Describe("Sync()", func() {

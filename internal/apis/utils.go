@@ -12,7 +12,7 @@ import (
 type jsonFormat = map[string]interface{}
 
 // SetupRouter binds all the routes to their handlers
-func SetupRouter(r *gin.Engine, database *db.GormDatabase) {
+func SetupRouter(r *gin.Engine, database db.Database) {
 	clusters := ClustersHandler{DB: database}
 	metrics := MetricsHandler{DB: database}
 	v1 := r.Group("/api/v1")

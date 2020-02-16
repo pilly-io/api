@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
 //Model : a copy of gorm.Model with json annotations
@@ -23,15 +25,15 @@ type Cluster struct {
 
 type Node struct {
 	Model
-	InstanceType      string            `json:"instance_type"`
-	Region            string            `json:"region"`
-	Zone              string            `json:"zone"`
-	Hostname          string            `json:"hostname"`
-	UID               string            `json:"uid"`
-	KubernetesVersion string            `json:"kubernetes_version"`
-	OS                string            `json:"os"`
-	ClusterID         int               `json:"cluster_id"`
-	Labels            map[string]string `json:"labels"`
+	InstanceType      string         `json:"instance_type"`
+	Region            string         `json:"region"`
+	Zone              string         `json:"zone"`
+	Hostname          string         `json:"hostname"`
+	UID               string         `json:"uid"`
+	KubernetesVersion string         `json:"kubernetes_version"`
+	OS                string         `json:"os"`
+	ClusterID         int            `json:"cluster_id"`
+	Labels            postgres.Jsonb `json:"labels"`
 }
 
 type Namespace struct {

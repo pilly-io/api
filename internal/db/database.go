@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pilly-io/api/internal/models"
 )
@@ -48,6 +49,13 @@ type Database interface {
 	Nodes() Table
 	Metrics() *MetricsTable
 	Owners() *OwnersTable
+	Flush()
+}
+
+// getAllModels returns all the models used in this DB, used to migrate DB and truncate
+// (can't use a const because go does not support array as constant)
+func getAllModels() []interface{} {
+	return []interface{}{&models.Cluster{}, &models.Node{}, &models.Owner{}, models.Metric{}}
 }
 
 // New creates an new DB object
@@ -66,7 +74,7 @@ func New(driver string, DBURI string) (*GormDatabase, error) {
 // Migrate sync the schemas of the DB
 func (db *GormDatabase) Migrate() {
 	//db.AutoMigrate(&models.Cluster{}, &models.Node{}, &models.Namespace{}, &models.Owner{}, models.Metric{})
-	db.AutoMigrate(&models.Cluster{}, &models.Node{}, &models.Owner{}, models.Metric{})
+	db.AutoMigrate(getAllModels()...)
 }
 
 // Insert creates a new record in the right table
@@ -92,4 +100,11 @@ func (db *GormDatabase) Metrics() *MetricsTable {
 // Owners returns the owners Table object
 func (db *GormDatabase) Owners() *OwnersTable {
 	return db.owners
+}
+
+// Truncate remove all records from all tables
+func (db *GormDatabase) Flush() {
+	for _, model := range getAllModels() {
+		db.Unscoped().Delete(model)
+	}
 }
