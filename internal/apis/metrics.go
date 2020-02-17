@@ -57,22 +57,28 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 	}
 	start := c.Value("Start").(time.Time)
 	end := c.Value("End").(time.Time)
-	clusterID := c.Param("id")
+	clusterID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	period, err := strconv.ParseInt(c.Query("period"), 10, 64)
 	if err != nil || period < MinPeriod {
 		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_period")))
 		return
 	}
-	//2. Get the owners&metrics within the interval
+	//2. Get the metrics within the interval grouped by period
+	//ownerUIDs := GetOwnerUIDs(&owners)
+	interval := db.QueryInterval{Start: start, End: end}
+	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), uint(period), interval)
+	metricsByOwnerUID, ownerUIDs := indexMetricsByOwnerUID(metrics)
+	//3. Get the owners within the interval
 	query := db.Query{
-		Conditions: db.QueryConditions{"cluster_id": clusterID},
-		Interval:   &db.QueryInterval{Start: start, End: end},
+		Conditions: db.QueryConditions{"cluster_id": clusterID, "uid__in": ownerUIDs},
+		Interval:   &interval,
 	}
 	handler.DB.Owners().FindAll(query, &owners)
-	ownerUIDs := GetOwnerUIDs(&owners)
-	metrics, _ := handler.DB.Metrics().FindAll(uint(period), *ownerUIDs)
-	fmt.Println(metrics)
-	//3. Get the metrics within the interval grouped by period
+	//4. Set the owners metrics
+	fmt.Println(metricsByOwnerUID)
+	fmt.Println(ownerUIDs)
+	fmt.Println(owners)
+
 	c.JSON(http.StatusOK, ObjectToJSON(&owners))
 }
 
@@ -83,4 +89,22 @@ func GetOwnerUIDs(owners *[]models.Owner) *[]string {
 		keys[i] = o.UID
 	}
 	return &keys
+}
+
+func indexMetricsByOwnerUID(metrics *[]models.Metric) (map[string][]models.Metric, []string) {
+	metricsByOwnerUID := make(map[string][]models.Metric)
+	var ownerUIDs []string
+	for _, metric := range *metrics {
+		if _, exist := metricsByOwnerUID[metric.OwnerUID]; !exist {
+			metricsByOwnerUID[metric.OwnerUID] = []models.Metric{}
+			ownerUIDs = append(ownerUIDs, metric.OwnerUID)
+		}
+		metricsByOwnerUID[metric.OwnerUID] = append(metricsByOwnerUID[metric.OwnerUID], metric)
+	}
+	return metricsByOwnerUID, ownerUIDs
+}
+
+//SetOwnersMetrics : Merge the list of owners with the list of metrics
+func setOwnersMetrics(owners *[]models.Owner, metrics *[]models.Metric) {
+
 }

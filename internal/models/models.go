@@ -60,4 +60,6 @@ type Owner struct {
 	Namespace string         `json:"namespace"`
 	Labels    postgres.Jsonb `json:"labels"`
 	ClusterID uint           `json:"cluster_id"`
+
+	//Metrics []Metric `json:"metrics"`
 }

@@ -1,7 +1,9 @@
 package db
 
 import (
+	"fmt"
 	"math"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 )
@@ -52,8 +54,32 @@ func (table *GormTable) Count(query Query) int {
 // FindAll returns all object matching parameters
 func (table *GormTable) FindAll(query Query, results interface{}) (*PaginationInfo, error) {
 	count := 0
+	var builder *gorm.DB
 
-	builder := table.Where(query.Conditions)
+	for key, value := range query.Conditions {
+		operation := ""
+		column := ""
+		suffix := strings.Split(key, "__")
+		if len(suffix) == 1 {
+			operation = " = ?"
+			column = key
+		} else {
+			column = suffix[0]
+			suffix := suffix[1]
+			switch suffix {
+			case "__in":
+				operation = " IN (?)"
+			case "__gt":
+				operation = "> ?"
+			case "__lt":
+				operation = "< ?"
+			default:
+				operation = " = ?"
+			}
+		}
+		condition := fmt.Sprintf("%s %s", column, operation)
+		builder = table.Where(condition, value)
+	}
 
 	if query.Interval != nil {
 		builder = builder.Unscoped()
