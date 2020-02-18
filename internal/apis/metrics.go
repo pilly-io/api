@@ -20,10 +20,11 @@ const MinPeriod = 60 // in seconds
 
 // ValidateRequest : Validate the cluster and start/end
 func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
+	clusterID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	query := db.Query{
-		Conditions: db.QueryConditions{"id": c.Param("id")},
+		Conditions: db.QueryConditions{"id": clusterID},
 	}
-	if !handler.DB.Clusters().Exists(query) {
+	if err != nil || !handler.DB.Clusters().Exists(query) {
 		c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("cluster_does_not_exist")))
 		return false
 	}

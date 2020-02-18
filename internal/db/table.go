@@ -54,7 +54,7 @@ func (table *GormTable) Count(query Query) int {
 // FindAll returns all object matching parameters
 func (table *GormTable) FindAll(query Query, results interface{}) (*PaginationInfo, error) {
 	count := 0
-	var builder *gorm.DB
+	builder := table.DB
 
 	for key, value := range query.Conditions {
 		operation := ""

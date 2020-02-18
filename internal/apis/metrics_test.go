@@ -103,7 +103,8 @@ var _ = Describe("Owners", func() {
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
-			req, _ := http.NewRequest("GET", "/api/v1/clusters/xxxx/owners/metrics", nil)
+			url := fmt.Sprintf("/api/v1/clusters/xxx/owners/metrics")
+			req, _ := http.NewRequest("GET", url, nil)
 			engine.ServeHTTP(res, req)
 
 			//2. Analyse the result
@@ -113,7 +114,8 @@ var _ = Describe("Owners", func() {
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
-			req, _ := http.NewRequest("GET", "/api/v1/clusters/1/owners/metrics", nil)
+			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
 			engine.ServeHTTP(res, req)
 
 			//2. Analyse the result
@@ -124,7 +126,8 @@ var _ = Describe("Owners", func() {
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
-			req, _ := http.NewRequest("GET", "/api/v1/clusters/1/owners/metrics", nil)
+			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
 			q := req.URL.Query()
 			q.Add("start", "start")
 			req.URL.RawQuery = q.Encode()
@@ -140,7 +143,8 @@ var _ = Describe("Owners", func() {
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
-			req, _ := http.NewRequest("GET", "/api/v1/clusters/1/owners/metrics", nil)
+			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
 			q := req.URL.Query()
 			q.Add("start", "1")
 			req.URL.RawQuery = q.Encode()
@@ -154,7 +158,8 @@ var _ = Describe("Owners", func() {
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
-			req, _ := http.NewRequest("GET", "/api/v1/clusters/1/owners/metrics", nil)
+			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
 			q := req.URL.Query()
 			q.Add("start", "1")
 			q.Add("end", "end")
@@ -171,7 +176,8 @@ var _ = Describe("Owners", func() {
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
-			req, _ := http.NewRequest("GET", "/api/v1/clusters/1/owners/metrics", nil)
+			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
 			q := req.URL.Query()
 			q.Add("start", "1")
 			q.Add("end", "2")
@@ -186,7 +192,8 @@ var _ = Describe("Owners", func() {
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
-			req, _ := http.NewRequest("GET", "/api/v1/clusters/1/owners/metrics", nil)
+			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
 			q := req.URL.Query()
 			q.Add("start", "1")
 			q.Add("end", "2")
@@ -202,7 +209,7 @@ var _ = Describe("Owners", func() {
 		})
 	})
 	Describe("ListMetrics() succeeds", func() {
-		FIt("Should return a 200 without the metrics of all the cluster", func() {
+		It("Should return a 200 without the metrics of all the cluster", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
