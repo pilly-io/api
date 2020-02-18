@@ -18,10 +18,6 @@ type MetricsHandler struct {
 }
 
 const MinPeriod = 60 // in seconds
-const MetricCPUUsed = "fill_with_proper_cpu_used_value"
-const MetricCPURequested = "fill_with_proper_cpu_requested_value"
-const MetricMemoryUsed = "fill_with_proper_memory_used_value"
-const MetricMemoryRequested = "fill_with_proper_memory_requested_value"
 
 // ValidateRequest : Validate the cluster and start/end
 func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
@@ -50,7 +46,6 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 // List the metrics of the cluster within an interval
 func (handler *MetricsHandler) List(c *gin.Context) {
 	var owners []models.Owner
-	//var metrics []models.Metric
 	// 1. Check sanity of the request
 	if !handler.ValidateRequest(c) {
 		return
@@ -64,47 +59,37 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 		return
 	}
 	//2. Get the metrics within the interval grouped by period
-	//ownerUIDs := GetOwnerUIDs(&owners)
 	interval := db.QueryInterval{Start: start, End: end}
 	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), uint(period), interval)
-	metricsByOwnerUID, ownerUIDs := indexMetricsByOwnerUID(metrics)
+	metricsByOwnerAndTimestamp, ownerUIDs := indexMetricsByOwnerAndTimestamp(metrics)
 	//3. Get the owners within the interval
 	query := db.Query{
 		Conditions: db.QueryConditions{"cluster_id": clusterID, "uid__in": ownerUIDs},
 		Interval:   &interval,
 	}
 	handler.DB.Owners().FindAll(query, &owners)
-	//4. Set the owners metrics
-	fmt.Println(metricsByOwnerUID)
-	fmt.Println(ownerUIDs)
+	//4. Compute the owners resources
+	handler.DB.Owners().ComputeResources(&owners, metricsByOwnerAndTimestamp)
+	//5. This is the end
 	fmt.Println(owners)
-
 	c.JSON(http.StatusOK, ObjectToJSON(&owners))
 }
 
-//GetOwnerUIDs : given a list of owners, retrieve their UID
-func GetOwnerUIDs(owners *[]models.Owner) *[]string {
-	keys := make([]string, len(*owners))
-	for i, o := range *owners {
-		keys[i] = o.UID
-	}
-	return &keys
-}
-
-func indexMetricsByOwnerUID(metrics *[]models.Metric) (map[string][]models.Metric, []string) {
-	metricsByOwnerUID := make(map[string][]models.Metric)
+//indexMetricsByOwnerAndTimestamp : this is ugly but life is ugly
+func indexMetricsByOwnerAndTimestamp(metrics *[]models.Metric) (*models.IndexedMetrics, []string) {
 	var ownerUIDs []string
+	metricsByOwnerAndTimestamp := make(models.IndexedMetrics)
 	for _, metric := range *metrics {
-		if _, exist := metricsByOwnerUID[metric.OwnerUID]; !exist {
-			metricsByOwnerUID[metric.OwnerUID] = []models.Metric{}
+		if _, exist := metricsByOwnerAndTimestamp[metric.OwnerUID]; !exist {
+			metricsByOwnerAndTimestamp[metric.OwnerUID] = map[time.Time]map[string]models.Metric{metric.Period: {metric.Name: metric}}
 			ownerUIDs = append(ownerUIDs, metric.OwnerUID)
+		} else {
+			if _, exist := metricsByOwnerAndTimestamp[metric.OwnerUID][metric.Period]; !exist {
+				metricsByOwnerAndTimestamp[metric.OwnerUID][metric.Period] = map[string]models.Metric{metric.Name: metric}
+			} else {
+				metricsByOwnerAndTimestamp[metric.OwnerUID][metric.Period][metric.Name] = metric
+			}
 		}
-		metricsByOwnerUID[metric.OwnerUID] = append(metricsByOwnerUID[metric.OwnerUID], metric)
 	}
-	return metricsByOwnerUID, ownerUIDs
-}
-
-//SetOwnersMetrics : Merge the list of owners with the list of metrics
-func setOwnersMetrics(owners *[]models.Owner, metrics *[]models.Metric) {
-
+	return &metricsByOwnerAndTimestamp, ownerUIDs
 }

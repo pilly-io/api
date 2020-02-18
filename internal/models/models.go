@@ -6,6 +6,22 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
+const MetricCPUUsed = "CPU_USED"
+const MetricCPURequested = "CPU_REQUESTED"
+const MetricMemoryUsed = "MEMORY_USED"
+const MetricMemoryRequested = "MEMORY_REQUESTED"
+
+//IndexedMetrics : index the metrics by owner, period and type as it's easier to process
+type IndexedMetrics = map[string]map[time.Time]map[string]Metric
+
+type Resources struct {
+	ResourcesTimestamp time.Time              `gorm:"-" json:"timestamp;omitempty"`
+	ResourcesUsed      map[string]interface{} `gorm:"-" json:"resources_used;omitempty"`
+	ResourcesRequested map[string]interface{} `gorm:"-" json:"resources_requested;omitempty"`
+	Price              float64                `gorm:"-" json:"price;omitempty"`
+	Score              float64                `gorm:"-" json:"score;omitempty"`
+}
+
 //Model : a copy of gorm.Model with json annotations
 type Model struct {
 	ID        uint       `gorm:"primary_key;column:id" json:"id"`
@@ -16,6 +32,7 @@ type Model struct {
 
 type Cluster struct {
 	Model
+	Resources
 	Name       string `gorm:"unique;not null" json:"name"`
 	Provider   string `json:"provider"`
 	Region     string `json:"region"`
@@ -54,12 +71,11 @@ type Metric struct {
 
 type Owner struct {
 	Model
+	Metrics   []Resources    `gorm:"-" json:"metrics;omitempty"`
 	UID       string         `json:"uid"`
 	Name      string         `json:"name"`
 	Type      string         `json:"type"`
 	Namespace string         `json:"namespace"`
 	Labels    postgres.Jsonb `json:"labels"`
 	ClusterID uint           `json:"cluster_id"`
-
-	//Metrics []Metric `json:"metrics"`
 }
