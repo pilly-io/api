@@ -36,16 +36,16 @@ func MetricsFactory(database db.Database, clusterID uint, ownerUID string, name 
 	return metric
 }
 
-//VeryOldOwner : create an owner and generate its metrics, will create a factory if needed
-func VeryOldOwner(database db.Database, clusterID uint) (*models.Owner, []*models.Metric) {
+//OwnerFactory : create an owner and generate its metrics
+func OwnerFactory(database db.Database, clusterID uint, name string, namespace string) (*models.Owner, []*models.Metric) {
 	var metrics []*models.Metric
 	uid, _ := uuid.NewRandom()
 	past := time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC)
 	owner := &models.Owner{
 		ClusterID: clusterID,
-		Name:      "toto",
+		Name:      name,
 		Type:      "deployment",
-		Namespace: "default",
+		Namespace: namespace,
 		UID:       uid.String(),
 	}
 	owner.Model.CreatedAt = past
@@ -89,6 +89,9 @@ var _ = Describe("Owners", func() {
 		engine = gin.New()
 		SetupRouter(engine, database)
 		cluster, _ = database.Clusters().Create("test", "aws")
+		OwnerFactory(database, cluster.ID, "tutum", "default")
+		OwnerFactory(database, cluster.ID, "falco", "infrastructure")
+
 	})
 
 	AfterEach(func() {
@@ -203,7 +206,6 @@ var _ = Describe("Owners", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
-			VeryOldOwner(database, cluster.ID)
 
 			//2. Create the GET request
 			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)

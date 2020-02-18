@@ -67,11 +67,11 @@ func (table *GormTable) FindAll(query Query, results interface{}) (*PaginationIn
 			column = suffix[0]
 			suffix := suffix[1]
 			switch suffix {
-			case "__in":
+			case "in":
 				operation = " IN (?)"
-			case "__gt":
+			case "gt":
 				operation = "> ?"
-			case "__lt":
+			case "lt":
 				operation = "< ?"
 			default:
 				operation = " = ?"

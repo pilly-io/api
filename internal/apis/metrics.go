@@ -2,7 +2,6 @@ package apis
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -71,7 +70,6 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 	//4. Compute the owners resources
 	handler.DB.Owners().ComputeResources(&owners, metricsByOwnerAndTimestamp)
 	//5. This is the end
-	fmt.Println(owners)
 	c.JSON(http.StatusOK, ObjectToJSON(&owners))
 }
 
