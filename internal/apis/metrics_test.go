@@ -172,22 +172,7 @@ var _ = Describe("Owners", func() {
 			errors := payload["errors"].([]interface{})
 			Expect(errors[0]).To(Equal("invalid_end"))
 		})
-		It("Should return a 400 as period is not defined", func() {
-			res := httptest.NewRecorder()
-
-			//1. Create the GET request
-			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)
-			req, _ := http.NewRequest("GET", url, nil)
-			q := req.URL.Query()
-			q.Add("start", "1")
-			q.Add("end", "2")
-			req.URL.RawQuery = q.Encode()
-			engine.ServeHTTP(res, req)
-
-			//2. Analyse the result
-			Expect(res.Code).To(Equal(400))
-		})
-		It("Should return a 400 as period is an invalid int", func() {
+		It("Should return a 400 as period is invalid", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 
@@ -209,7 +194,7 @@ var _ = Describe("Owners", func() {
 		})
 	})
 	Describe("ListMetrics() succeeds", func() {
-		It("Should return a 200 without the metrics of all the cluster", func() {
+		FIt("Should return a 200 without the metrics of all the cluster", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
@@ -228,7 +213,7 @@ var _ = Describe("Owners", func() {
 			Expect(res.Code).To(Equal(200))
 			json.Unmarshal(res.Body.Bytes(), &payload)
 			data := payload["data"].([]interface{})
-			Expect(data).ToNot(BeEmpty())
+			Expect(data).To(HaveLen(2))
 		})
 		It("Should return a 200 without the metrics of a namespace", func() {
 		})

@@ -18,9 +18,10 @@ type MetricsHandler struct {
 
 const MinPeriod = 60 // in seconds
 
-// ValidateRequest : Validate the cluster and start/end
+// ValidateRequest : Validate the cluster, interval, period
 func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 	clusterID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	var ownerUIDs []string
 	query := db.Query{
 		Conditions: db.QueryConditions{"id": clusterID},
 	}
@@ -38,8 +39,25 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_end")))
 		return false
 	}
+	period, err := strconv.ParseInt(c.DefaultQuery("period", MinPeriod), 10, 64)
+	if err != nil || period < MinPeriod {
+		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_period")))
+		return false
+	}
+	namespace := c.Query("namespace")
+	if namespace != "" {
+		query = db.Query{
+			Conditions: db.QueryConditions{"id": clusterID, "name": namespace},
+		}
+		if !handler.DB.Namespaces().Exists(query) {
+			c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("namespace_does_not_exist")))
+			return false
+		}
+	}
 	c.Set("Start", *start)
 	c.Set("End", *end)
+	c.Set("Period", period)
+	c.Set("OwnerUIDs", ownerUIDs)
 	return true
 }
 
@@ -53,42 +71,37 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 	start := c.Value("Start").(time.Time)
 	end := c.Value("End").(time.Time)
 	clusterID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	period, err := strconv.ParseInt(c.Query("period"), 10, 64)
-	if err != nil || period < MinPeriod {
-		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_period")))
-		return
-	}
-	//2. Get the metrics within the interval grouped by period
+	period := c.Value("Period").(int64)
+
+	//2. Get all the owners or specific ones
 	interval := db.QueryInterval{Start: start, End: end}
-	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), uint(period), interval)
-	metricsByOwnerAndTimestamp, ownerUIDs := indexMetricsByOwnerAndTimestamp(metrics)
-	//3. Get the owners within the interval
 	query := db.Query{
-		Conditions: db.QueryConditions{"cluster_id": clusterID, "uid__in": ownerUIDs},
+		Conditions: db.QueryConditions{"cluster_id": clusterID},
 		Interval:   &interval,
 	}
 	handler.DB.Owners().FindAll(query, &owners)
+	//3. Get the metrics within the interval grouped by period
+	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), uint(period), interval)
+	metricsIndexed := indexMetrics(metrics)
 	//4. Compute the owners resources
-	handler.DB.Owners().ComputeResources(&owners, metricsByOwnerAndTimestamp)
+	handler.DB.Owners().ComputeResources(&owners, metricsIndexed)
 	//5. This is the end
 	c.JSON(http.StatusOK, ObjectToJSON(&owners))
 }
 
-//indexMetricsByOwnerAndTimestamp : this is ugly but life is ugly
-func indexMetricsByOwnerAndTimestamp(metrics *[]models.Metric) (*models.IndexedMetrics, []string) {
-	var ownerUIDs []string
-	metricsByOwnerAndTimestamp := make(models.IndexedMetrics)
+//indexMetrics : this is ugly but life is ugly
+func indexMetrics(metrics *[]models.Metric) *models.IndexedMetrics {
+	metricsIndexed := make(models.IndexedMetrics)
 	for _, metric := range *metrics {
-		if _, exist := metricsByOwnerAndTimestamp[metric.OwnerUID]; !exist {
-			metricsByOwnerAndTimestamp[metric.OwnerUID] = map[time.Time]map[string]models.Metric{metric.Period: {metric.Name: metric}}
-			ownerUIDs = append(ownerUIDs, metric.OwnerUID)
+		if _, exist := metricsIndexed[metric.OwnerUID]; !exist {
+			metricsIndexed[metric.OwnerUID] = map[time.Time]map[string]models.Metric{metric.Period: {metric.Name: metric}}
 		} else {
-			if _, exist := metricsByOwnerAndTimestamp[metric.OwnerUID][metric.Period]; !exist {
-				metricsByOwnerAndTimestamp[metric.OwnerUID][metric.Period] = map[string]models.Metric{metric.Name: metric}
+			if _, exist := metricsIndexed[metric.OwnerUID][metric.Period]; !exist {
+				metricsIndexed[metric.OwnerUID][metric.Period] = map[string]models.Metric{metric.Name: metric}
 			} else {
-				metricsByOwnerAndTimestamp[metric.OwnerUID][metric.Period][metric.Name] = metric
+				metricsIndexed[metric.OwnerUID][metric.Period][metric.Name] = metric
 			}
 		}
 	}
-	return &metricsByOwnerAndTimestamp, ownerUIDs
+	return &metricsIndexed
 }

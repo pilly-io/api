@@ -35,10 +35,11 @@ type Query struct {
 // GormDatabase is wrapper for the orm
 type GormDatabase struct {
 	*gorm.DB
-	clusters *ClustersTable
-	Node     Table
-	metrics  *MetricsTable
-	owners   *OwnersTable
+	clusters   *ClustersTable
+	Node       Table
+	metrics    *MetricsTable
+	owners     *OwnersTable
+	namespaces Table
 }
 
 // Database interface
@@ -49,13 +50,14 @@ type Database interface {
 	Nodes() Table
 	Metrics() *MetricsTable
 	Owners() *OwnersTable
+	Namespaces() *Table
 	Flush()
 }
 
 // getAllModels returns all the models used in this DB, used to migrate DB and truncate
 // (can't use a const because go does not support array as constant)
 func getAllModels() []interface{} {
-	return []interface{}{&models.Cluster{}, &models.Node{}, &models.Owner{}, models.Metric{}}
+	return []interface{}{&models.Cluster{}, &models.Node{}, &models.Owner{}, models.Metric{}, models.Namespace{}}
 }
 
 // New creates an new DB object
@@ -68,6 +70,7 @@ func New(driver string, DBURI string) (*GormDatabase, error) {
 		NewTable(db, models.Node{}),
 		NewMetricsTable(db, models.Metric{}),
 		NewOwnersTable(db, models.Owner{}),
+		NewTable(db, models.Namespace{}),
 	}, err
 }
 
@@ -100,6 +103,11 @@ func (db *GormDatabase) Metrics() *MetricsTable {
 // Owners returns the owners Table object
 func (db *GormDatabase) Owners() *OwnersTable {
 	return db.owners
+}
+
+// Namespaces returns the namespaces Table object
+func (db *GormDatabase) Namespaces() *Table {
+	return db.namespaces
 }
 
 // Flush remove all records from all tables
