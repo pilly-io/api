@@ -6,6 +6,9 @@
         "hostname": "node1.example.com",
         "uid": "816d2d42-4dd0-4e05-97eb-f077983b73dc",
         "kubernetes_version": "1.15.2",
-        "os": "linux"
+        "os": "linux",
+        "labels": {
+            "key1": "val1"
+        }
     }
 ]

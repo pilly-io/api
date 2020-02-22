@@ -172,4 +172,22 @@ var _ = Describe("GormDatabase", func() {
 			Expect(count).To(Equal(0))
 		})
 	})
+
+	Describe("Update()", func() {
+		It("update record in DB", func() {
+			var clusterInDB models.Cluster
+
+			cluster := models.Cluster{Name: "cluster1"}
+			table.Insert(&cluster)
+
+			cluster.Name = "New name"
+			table.Update(cluster)
+
+			table.Find(Query{
+				Conditions: QueryConditions{"id": cluster.ID},
+			}, &clusterInDB)
+
+			Expect(clusterInDB.Name).To(Equal("New name"))
+		})
+	})
 })

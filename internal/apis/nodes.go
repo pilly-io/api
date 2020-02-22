@@ -29,25 +29,44 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 
 	nodesTable.FindAll(existingNodesQuery, &existingNodes)
 	existingNodesByUID := indexNodesByUID(&existingNodes)
+	nodesByUID := indexNodesByUID(&nodes)
 
+	// Merge nodes infos beased on their UID
 	for _, node := range nodes {
+		node.ClusterID = cluster.ID
 		existingNode, ok := existingNodesByUID[node.UID]
 		if ok {
 			existingNode.Labels = node.Labels
-
+			nodesTable.Update(existingNode)
 		} else {
 			err := nodesTable.Insert(&node)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, ErrorsToJSON(err))
-				fmt.Println(err)
-				return
+				c.AbortWithStatusJSON(http.StatusBadRequest, ErrorsToJSON(err))
 			}
 		}
 	}
+
+	// Mark nodes as deleted if not received
+	nodeIDsToDelete := make([]uint)
+	for _, existingNode := range existingNodes {
+		if _, ok := nodesByUID[existingNode.UID]; ok == false {
+			nodeIDsToDelete = append(nodeIDsToDelete, existingNode.ID)
+		}
+	}
+	nodesTable.DeleteWhere(db.Query{
+		Conditions: db.QueryConditions{
+			"id__in": nodeIDsToDelete
+		},
+	})
+
+	// Update cluster's nodes count and region if not set
 	cluster.NodesCount = len(nodes)
-	if cluster.NodesCount > 0 && cluster.Region != "" {
+	if cluster.NodesCount > 0 && cluster.Region == "" {
 		cluster.Region = nodes[0].Region
 	}
+
+	handler.DB.Clusters().Update(&cluster)
+	c.JSON(http.StatusCreated, ObjectToJSON(nil))
 }
 
 func indexNodesByUID(nodes *[]models.Node) map[string]models.Node {

@@ -39,7 +39,7 @@ var _ = Describe("NodesHandler", func() {
 	})
 
 	Describe("Sync()", func() {
-		FIt("should create node if does not exist", func() {
+		It("should create node if does not exist", func() {
 			data := tests.LoadFile("testdata/nodes.json")
 			res := httptest.NewRecorder()
 
@@ -59,11 +59,70 @@ var _ = Describe("NodesHandler", func() {
 			count = database.Nodes().Count(countQuery)
 			Expect(count).To(Equal(1))
 
-			// //2. Analyse the result
-			// json.Unmarshal(res.Body.Bytes(), &paylod)
-			// Expect(res.Code).To(Equal(201))
-			// Expect(paylod["data"]).To(HaveKeyWithValue("name", "cluster1"))
-			// Expect(paylod["data"]).To(HaveKeyWithValue("provider", "aws"))
+			Expect(res.Code).To(Equal(201))
+		})
+
+		It("should update nodes count of cluster", func() {
+			var clusterFromDB models.Cluster
+			data := tests.LoadFile("testdata/nodes.json")
+			res := httptest.NewRecorder()
+
+			clusterQuery := db.Query{
+				Conditions: db.QueryConditions{
+					"id": cluster.ID,
+				},
+			}
+
+			database.Nodes().Find(clusterQuery, &clusterFromDB)
+			Expect(clusterFromDB.NodesCount).To(Equal(0))
+
+			req, _ := http.NewRequest("POST", "/api/v1/collector/nodes", bytes.NewBuffer(data))
+			req.Header.Set(middlewares.ClusterAuthHeaderName, cluster.APIToken)
+			engine.ServeHTTP(res, req)
+
+			database.Nodes().Find(clusterQuery, &clusterFromDB)
+			Expect(clusterFromDB.NodesCount).To(Equal(1))
+		})
+
+		It("should update region of cluster if not set", func() {
+			var clusterFromDB models.Cluster
+			data := tests.LoadFile("testdata/nodes.json")
+			res := httptest.NewRecorder()
+
+			clusterQuery := db.Query{
+				Conditions: db.QueryConditions{
+					"id": cluster.ID,
+				},
+			}
+
+			database.Nodes().Find(clusterQuery, &clusterFromDB)
+			Expect(clusterFromDB.Region).To(Equal(""))
+
+			req, _ := http.NewRequest("POST", "/api/v1/collector/nodes", bytes.NewBuffer(data))
+			req.Header.Set(middlewares.ClusterAuthHeaderName, cluster.APIToken)
+			engine.ServeHTTP(res, req)
+
+			database.Nodes().Find(clusterQuery, &clusterFromDB)
+			Expect(clusterFromDB.Region).To(Equal("euwest1"))
+		})
+
+		FIt("should mark nodes as deleted if not sent", func() {
+			deletedNode := models.Node{UID: "cbd46a8e-faa1-4f2a-a826-f45169d5ba14"}
+			database.Nodes().Insert(&deletedNode)
+
+			Expect(deletedNode.DeletedAt).To(BeNil())
+
+			data := tests.LoadFile("testdata/nodes.json")
+			res := httptest.NewRecorder()
+
+			req, _ := http.NewRequest("POST", "/api/v1/collector/nodes", bytes.NewBuffer(data))
+			req.Header.Set(middlewares.ClusterAuthHeaderName, cluster.APIToken)
+			engine.ServeHTTP(res, req)
+
+			database.Nodes().Find(db.Query{
+				Conditions: db.QueryConditions{"id": deletedNode.ID},
+			}, &deletedNode)
+			Expect(deletedNode.DeletedAt).ToNot(BeNil())
 		})
 	})
 })

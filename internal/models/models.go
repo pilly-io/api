@@ -15,41 +15,42 @@ const MetricMemoryRequested = "MEMORY_REQUESTED"
 type IndexedMetrics = map[string]map[time.Time]map[string]Metric
 
 type Resources struct {
-	ResourcesTimestamp time.Time              `gorm:"-" json:"timestamp;omitempty"`
-	ResourcesUsed      map[string]interface{} `gorm:"-" json:"resources_used;omitempty"`
-	ResourcesRequested map[string]interface{} `gorm:"-" json:"resources_requested;omitempty"`
-	Price              float64                `gorm:"-" json:"price;omitempty"`
-	Score              float64                `gorm:"-" json:"score;omitempty"`
+	ResourcesTimestamp time.Time              `orm:"-" json:"timestamp;omitempty"`
+	ResourcesUsed      map[string]interface{} `orm:"-" json:"resources_used;omitempty"`
+	ResourcesRequested map[string]interface{} `orm:"-" json:"resources_requested;omitempty"`
+	Price              float64                `orm:"-" json:"price;omitempty"`
+	Score              float64                `orm:"-" json:"score;omitempty"`
 }
 
-//Model : a copy of gorm.Model with json annotations
+//Model : a copy of orm.Model with json annotations
 type Model struct {
-	ID        uint       `gorm:"primary_key;column:id" json:"id"`
-	CreatedAt time.Time  `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt time.Time  `gorm:"column:updated_at" json:"updated_at"`
-	DeletedAt *time.Time `gorm:"column:deleted_at" json:"deleted_at"`
+	ID        uint       `orm:"pk;column:id" json:"id"`
+	CreatedAt time.Time  `orm:"auto_now_add;type(datetime)" json:"created_at"`
+	UpdatedAt time.Time  `orm:"auto_now_add;type(datetime)" json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 type Cluster struct {
 	Model
 	Resources
-	Name       string `gorm:"unique;not null" json:"name"`
-	Provider   string `json:"provider"`
-	Region     string `json:"region"`
-	APIToken   string `json:"api_token"`
-	NodesCount int    `json:"nodes_count"`
+	Name       string `orm:"unique" json:"name"`
+	Provider   string `orm:"null" json:"provider"`
+	Region     string `orm:"null" json:"region"`
+	APIToken   string `orm:"null" json:"api_token"`
+	NodesCount int    `orm:"null" json:"nodes_count"`
 }
 
 type Node struct {
 	Model
-	InstanceType      string `json:"instance_type"`
-	Region            string `json:"region"`
-	Zone              string `json:"zone"`
-	Hostname          string `json:"hostname"`
-	UID               string `json:"uid"`
-	KubernetesVersion string `json:"kubernetes_version"`
-	OS                string `json:"os"`
-	ClusterID         int    `json:"cluster_id"`
+	InstanceType      string         `json:"instance_type"`
+	Region            string         `json:"region"`
+	Zone              string         `json:"zone"`
+	Hostname          string         `json:"hostname"`
+	UID               string         `json:"uid"`
+	KubernetesVersion string         `json:"kubernetes_version"`
+	OS                string         `json:"os"`
+	ClusterID         uint           `json:"cluster_id"`
+	Labels            postgres.Jsonb `json:"labels"`
 }
 
 type Namespace struct {
@@ -65,12 +66,12 @@ type Metric struct {
 	Value     float64   `json:"metric_value"`
 	OwnerUID  string    `json:"owner_uid"`
 	ClusterID uint      `json:"cluster_id"`
-	Period    time.Time `gorm:"-"`
+	Period    time.Time `orm:"-"`
 }
 
 type Owner struct {
 	Model
-	Metrics   []Resources    `gorm:"-" json:"metrics;omitempty"`
+	Metrics   []Resources    `orm:"-" json:"metrics;omitempty"`
 	UID       string         `json:"uid"`
 	Name      string         `json:"name"`
 	Type      string         `json:"type"`

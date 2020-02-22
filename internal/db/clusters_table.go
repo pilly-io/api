@@ -8,12 +8,12 @@ import (
 
 // ClustersTable implements Cluster specific operations
 type ClustersTable struct {
-	*GormTable
+	*BeegoTable
 }
 
 // NewTable : returns a new Table object
 func NewClusterTable(client *gorm.DB, model models.Cluster) *ClustersTable {
-	table := GormTable{client, model}
+	table := BeegoTable{client, model}
 	return &ClustersTable{&table}
 }
 

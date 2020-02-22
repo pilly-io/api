@@ -3,6 +3,7 @@ module github.com/pilly-io/api
 go 1.13
 
 require (
+	github.com/astaxie/beego v1.12.1
 	github.com/coreos/etcd v3.3.10+incompatible
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-delve/delve v1.4.0 // indirect
