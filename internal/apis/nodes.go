@@ -36,7 +36,7 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 			existingNode.Labels = node.Labels
 
 		} else {
-			err := nodesTable.Insert(node)
+			err := nodesTable.Insert(&node)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, ErrorsToJSON(err))
 				fmt.Println(err)

@@ -50,7 +50,7 @@ type Database interface {
 	Nodes() Table
 	Metrics() *MetricsTable
 	Owners() *OwnersTable
-	Namespaces() *Table
+	Namespaces() Table
 	Flush()
 }
 
@@ -106,7 +106,7 @@ func (db *GormDatabase) Owners() *OwnersTable {
 }
 
 // Namespaces returns the namespaces Table object
-func (db *GormDatabase) Namespaces() *Table {
+func (db *GormDatabase) Namespaces() Table {
 	return db.namespaces
 }
 

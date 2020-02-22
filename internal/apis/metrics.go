@@ -39,7 +39,7 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_end")))
 		return false
 	}
-	period, err := strconv.ParseInt(c.DefaultQuery("period", MinPeriod), 10, 64)
+	period, err := strconv.ParseInt(c.DefaultQuery("period", string(MinPeriod)), 10, 64)
 	if err != nil || period < MinPeriod {
 		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_period")))
 		return false
