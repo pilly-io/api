@@ -2,6 +2,7 @@ package apis
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pilly-io/api/internal/db"
@@ -33,9 +34,14 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 		existingNode, ok := existingNodesByUID[node.UID]
 		if ok {
 			existingNode.Labels = node.Labels
-			
+
 		} else {
-			nodesTable.Insert(node)
+			err := nodesTable.Insert(node)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, ErrorsToJSON(err))
+				fmt.Println(err)
+				return
+			}
 		}
 	}
 	cluster.NodesCount = len(nodes)

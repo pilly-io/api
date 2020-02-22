@@ -39,7 +39,7 @@ var _ = Describe("NodesHandler", func() {
 	})
 
 	Describe("Sync()", func() {
-		It("should create node if does not exist", func() {
+		FIt("should create node if does not exist", func() {
 			data := tests.LoadFile("testdata/nodes.json")
 			res := httptest.NewRecorder()
 
@@ -49,14 +49,14 @@ var _ = Describe("NodesHandler", func() {
 					"cluster_id": cluster.ID,
 				},
 			}
-			database.Nodes().Count(countQuery)
+			count = database.Nodes().Count(countQuery)
 			Expect(count).To(Equal(0))
 
 			req, _ := http.NewRequest("POST", "/api/v1/collector/nodes", bytes.NewBuffer(data))
 			req.Header.Set(middlewares.ClusterAuthHeaderName, cluster.APIToken)
 			engine.ServeHTTP(res, req)
 
-			database.Nodes().Count(countQuery)
+			count = database.Nodes().Count(countQuery)
 			Expect(count).To(Equal(1))
 
 			// //2. Analyse the result
