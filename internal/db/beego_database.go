@@ -10,35 +10,44 @@ type BeegoDatabase struct {
 	client *orm.Ormer
 
 	clusters   *ClustersTable
-	Node       Table
+	nodes      Table
 	metrics    *MetricsTable
 	owners     *OwnersTable
 	namespaces Table
-	tables []Table
 }
 
 const dbAlias = "default"
+
+func init() {
+	orm.RegisterModel(new(models.Cluster), new(models.Node), new(models.Namespace), new(models.Metric), new(models.Owner))
+}
 
 func NewBeegoDatabase(uri string) *BeegoDatabase {
 	orm.RegisterDriver("postgres", orm.DRPostgres)
 
 	orm.RegisterDataBase(dbAlias, "postgres", uri)
-	orm.RegisterModel(new(models.Cluster), new(models.Node), new(models.Namespace), new(models.Metric), new(models.Owner))
 
 	client := orm.NewOrm()
-	var clusters, nodes, metrics, owners, namespaces Table
+	clusters := NewClusterTable(client, models.Cluster{})
+	nodes := NewBeegoTable(client, models.Node{})
+	metrics := NewMetricsTable(client, models.Metric{})
+	namespaces := NewBeegoTable(client, models.Namespace{})
+	owners := NewOwnersTable(client, models.Owner{})
 	return &BeegoDatabase{
-		client: &client,
-		tables: []Table{clusters, nodes, metrics, owners, namespaces}
+		&client,
+		clusters,
+		nodes,
+		metrics,
+		owners,
+		namespaces,
 	}
 }
 
 // Migrate sync the schemas of the DB
 func (db *BeegoDatabase) Migrate() {
 	//db.AutoMigrate(&models.Cluster{}, &models.Node{}, &models.Namespace{}, &models.Owner{}, models.Metric{})
-	orm.RunSyncdb(dbAlias, false, true)
+	orm.RunSyncdb(dbAlias, true, true)
 }
-
 
 // Clusters returns the clusters Table object
 func (db *BeegoDatabase) Clusters() *ClustersTable {
@@ -67,7 +76,9 @@ func (db *BeegoDatabase) Namespaces() Table {
 
 // Flush delete all records from all tables
 func (db *BeegoDatabase) Flush() {
-	for _, table := range db.tables {
-		table.Delete(Query{})
-	}
+	db.Clusters().Delete(Query{}, false)
+	db.Namespaces().Delete(Query{}, false)
+	db.Owners().Delete(Query{}, false)
+	db.Metrics().Delete(Query{}, false)
+	db.Nodes().Delete(Query{}, false)
 }

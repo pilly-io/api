@@ -29,14 +29,14 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 
 	nodesTable.FindAll(existingNodesQuery, &existingNodes)
 	existingNodesByUID := indexNodesByUID(&existingNodes)
-	nodesByUID := indexNodesByUID(&nodes)
+	//nodesByUID := indexNodesByUID(&nodes)
 
 	// Merge nodes infos beased on their UID
 	for _, node := range nodes {
 		node.ClusterID = cluster.ID
 		existingNode, ok := existingNodesByUID[node.UID]
 		if ok {
-			existingNode.Labels = node.Labels
+			//existingNode.Labels = node.Labels
 			nodesTable.Update(existingNode)
 		} else {
 			err := nodesTable.Insert(&node)
@@ -47,7 +47,7 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 	}
 
 	// Mark nodes as deleted if not received
-	nodeIDsToDelete := make([]uint)
+	/*nodeIDsToDelete := make([]uint)
 	for _, existingNode := range existingNodes {
 		if _, ok := nodesByUID[existingNode.UID]; ok == false {
 			nodeIDsToDelete = append(nodeIDsToDelete, existingNode.ID)
@@ -55,9 +55,9 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 	}
 	nodesTable.DeleteWhere(db.Query{
 		Conditions: db.QueryConditions{
-			"id__in": nodeIDsToDelete
+			"id__in": nodeIDsToDelete,
 		},
-	})
+	})*/
 
 	// Update cluster's nodes count and region if not set
 	cluster.NodesCount = len(nodes)

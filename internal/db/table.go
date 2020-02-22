@@ -7,5 +7,5 @@ type Table interface {
 	Insert(value interface{}) error
 	Count(query Query) int
 	Update(object interface{}) error
-	Delete(query Query, soft bool) error
+	Delete(query Query, soft bool) (int64, error)
 }

@@ -106,7 +106,7 @@ var _ = Describe("NodesHandler", func() {
 			Expect(clusterFromDB.Region).To(Equal("euwest1"))
 		})
 
-		FIt("should mark nodes as deleted if not sent", func() {
+		It("should mark nodes as deleted if not sent", func() {
 			deletedNode := models.Node{UID: "cbd46a8e-faa1-4f2a-a826-f45169d5ba14"}
 			database.Nodes().Insert(&deletedNode)
 

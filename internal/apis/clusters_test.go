@@ -57,7 +57,7 @@ var _ = Describe("Clusters", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			cluster1 := models.Cluster{Name: "cluster1"}
-			database.Insert(&cluster1)
+			database.Clusters().Insert(&cluster1)
 
 			//1. Create the POST request
 			clusterBytes := []byte(`{"name":"cluster1", "provider":"aws"}`)
@@ -75,9 +75,9 @@ var _ = Describe("Clusters", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			cluster1 := models.Cluster{Name: "cluster1"}
-			database.Insert(&cluster1)
+			database.Clusters().Insert(&cluster1)
 			cluster2 := models.Cluster{Name: "cluster2"}
-			database.Insert(&cluster2)
+			database.Clusters().Insert(&cluster2)
 
 			//1. Create the GET request
 			req, _ := http.NewRequest("GET", "/api/v1/clusters", nil)

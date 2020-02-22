@@ -1,8 +1,8 @@
 package db
 
 import (
+	"github.com/astaxie/beego/orm"
 	"github.com/google/uuid"
-	"github.com/jinzhu/gorm"
 	"github.com/pilly-io/api/internal/models"
 )
 
@@ -11,10 +11,10 @@ type ClustersTable struct {
 	*BeegoTable
 }
 
-// NewTable : returns a new Table object
-func NewClusterTable(client *gorm.DB, model models.Cluster) *ClustersTable {
-	table := BeegoTable{client, model}
-	return &ClustersTable{&table}
+// NewClusterTable : returns a new Table object
+func NewClusterTable(client orm.Ormer, model models.Cluster) *ClustersTable {
+	table := NewBeegoTable(client, model)
+	return &ClustersTable{table}
 }
 
 // Create a new cluster and populate missing fields

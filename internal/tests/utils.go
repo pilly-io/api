@@ -2,7 +2,6 @@ package tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -32,10 +31,7 @@ func LoadFile(path string) []byte {
 
 // SetupDB connect database and returns it
 func SetupDB() db.Database {
-	database, err := db.New(os.Getenv("PILLY_DB_DRIVER"), os.Getenv("PILLY_DB_URI"))
-	if err != nil {
-		panic(fmt.Sprintf("Can't connect to DB: %s", err))
-	}
+	database := db.NewBeegoDatabase(os.Getenv("PILLY_DB_URI"))
 	database.Migrate()
 	return database
 }

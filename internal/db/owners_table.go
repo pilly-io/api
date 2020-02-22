@@ -1,19 +1,19 @@
 package db
 
 import (
-	"github.com/jinzhu/gorm"
+	"github.com/astaxie/beego/orm"
 	"github.com/pilly-io/api/internal/models"
 )
 
 // OwnersTable implements Cluster specific operations
 type OwnersTable struct {
-	*GormTable
+	*BeegoTable
 }
 
 // NewOwnersTable : returns a new Table object
-func NewOwnersTable(client *gorm.DB, model models.Owner) *OwnersTable {
-	table := GormTable{client, model}
-	return &OwnersTable{&table}
+func NewOwnersTable(client orm.Ormer, model models.Owner) *OwnersTable {
+	table := NewBeegoTable(client, model)
+	return &OwnersTable{table}
 }
 
 //ComputeResources : Given metrics compute the owners resources

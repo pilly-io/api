@@ -21,14 +21,12 @@ type Query struct {
 	Interval   *QueryInterval
 	Limit      int
 	OrderBy    string
-	Desc       bool
 	Page       int
 }
 
 // Database interface
 type Database interface {
 	Migrate()
-	Insert(value interface{}) error
 	Clusters() *ClustersTable
 	Nodes() Table
 	Metrics() *MetricsTable

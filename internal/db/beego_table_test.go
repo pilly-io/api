@@ -1,11 +1,13 @@
-package db
+package db_test
 
 import (
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
+	"github.com/pilly-io/api/internal/tests"
 )
 
 func TestTable(t *testing.T) {
@@ -15,24 +17,23 @@ func TestTable(t *testing.T) {
 
 var _ = Describe("GormDatabase", func() {
 	var (
-		db    Database
-		table Table
+		database db.Database
+		table    db.Table
 	)
 	BeforeEach(func() {
-		db, _ = New("sqlite3", ":memory:")
-		db.Migrate()
-		table = db.Clusters()
+		database = tests.SetupDB()
+		table = database.Clusters()
 	})
 
 	Describe("Find()", func() {
 		It("returns record matching the query", func() {
 			cluster1 := models.Cluster{Name: "cluster1"}
-			db.Insert(&cluster1)
+			database.Clusters().Insert(&cluster1)
 			cluster2 := models.Cluster{Name: "cluster2"}
-			db.Insert(&cluster2)
+			database.Clusters().Insert(&cluster2)
 
-			query := Query{
-				Conditions: QueryConditions{"name": "cluster1"},
+			query := db.Query{
+				Conditions: db.QueryConditions{"name": "cluster1"},
 			}
 			result := models.Cluster{}
 			table.Find(query, &result)
@@ -42,8 +43,8 @@ var _ = Describe("GormDatabase", func() {
 
 		It("returns error if record not found", func() {
 			result := models.Cluster{}
-			query := Query{
-				Conditions: QueryConditions{"name": "cluster2"},
+			query := db.Query{
+				Conditions: db.QueryConditions{"name": "cluster2"},
 			}
 			err := table.Find(query, &result)
 			Expect(err).To(HaveOccurred())
@@ -53,18 +54,18 @@ var _ = Describe("GormDatabase", func() {
 	Describe("Exists()", func() {
 		It("returns true if record exists", func() {
 			cluster1 := models.Cluster{Name: "cluster1"}
-			db.Insert(&cluster1)
+			database.Clusters().Insert(&cluster1)
 
-			query := Query{
-				Conditions: QueryConditions{"name": cluster1.Name},
+			query := db.Query{
+				Conditions: db.QueryConditions{"name": cluster1.Name},
 			}
 			exists := table.Exists(query)
 			Expect(exists).To(BeTrue())
 		})
 
 		It("returns false if record not found", func() {
-			query := Query{
-				Conditions: QueryConditions{"name": "cluster2"},
+			query := db.Query{
+				Conditions: db.QueryConditions{"name": "cluster2"},
 			}
 			exists := table.Exists(query)
 			Expect(exists).To(BeFalse())
@@ -79,16 +80,16 @@ var _ = Describe("GormDatabase", func() {
 		)
 		BeforeEach(func() {
 			cluster1 = models.Cluster{Name: "cluster1"}
-			db.Insert(&cluster1)
+			database.Clusters().Insert(&cluster1)
 			cluster2 = models.Cluster{Name: "cluster2"}
-			db.Insert(&cluster2)
+			database.Clusters().Insert(&cluster2)
 			cluster3 = models.Cluster{Name: "cluster3"}
-			db.Insert(&cluster3)
+			database.Clusters().Insert(&cluster3)
 		})
 
 		It("returns records matching the query", func() {
-			query := Query{
-				Conditions: QueryConditions{"name": "cluster1"},
+			query := db.Query{
+				Conditions: db.QueryConditions{"name": "cluster1"},
 			}
 			var results []models.Cluster
 			table.FindAll(query, &results)
@@ -98,7 +99,7 @@ var _ = Describe("GormDatabase", func() {
 		})
 
 		It("returns all records if conditions", func() {
-			query := Query{}
+			query := db.Query{}
 			var results []models.Cluster
 			pagination, _ := table.FindAll(query, &results)
 
@@ -111,9 +112,8 @@ var _ = Describe("GormDatabase", func() {
 		})
 
 		It("returns cluster3 because of orderby and limit", func() {
-			query := Query{
-				OrderBy: "name",
-				Desc:    true,
+			query := db.Query{
+				OrderBy: "-name",
 				Limit:   1,
 			}
 			var results []models.Cluster
@@ -124,7 +124,7 @@ var _ = Describe("GormDatabase", func() {
 		})
 
 		It("returns cluster2 because of offset", func() {
-			query := Query{
+			query := db.Query{
 				OrderBy: "name",
 				Limit:   1,
 				Page:    2,
@@ -141,13 +141,12 @@ var _ = Describe("GormDatabase", func() {
 			Expect(pagination.Limit).To(Equal(1))
 		})
 
-		It("returns error if invalid query", func() {
-			query := Query{
+		PIt("returns error if invalid query", func() {
+			query := db.Query{
 				OrderBy: "fake",
 			}
 			var results []models.Cluster
 			_, err := table.FindAll(query, &results)
-
 			Expect(err).To(HaveOccurred())
 		})
 	})
@@ -155,18 +154,18 @@ var _ = Describe("GormDatabase", func() {
 	Describe("Count()", func() {
 		It("returns number of records that match query", func() {
 			cluster1 := models.Cluster{Name: "cluster1"}
-			db.Insert(&cluster1)
+			database.Clusters().Insert(&cluster1)
 
-			query := Query{
-				Conditions: QueryConditions{"name": cluster1.Name},
+			query := db.Query{
+				Conditions: db.QueryConditions{"name": cluster1.Name},
 			}
 			count := table.Count(query)
 			Expect(count).To(Equal(1))
 		})
 
 		It("returns 0 if no records match", func() {
-			query := Query{
-				Conditions: QueryConditions{"name": "cluster2"},
+			query := db.Query{
+				Conditions: db.QueryConditions{"name": "cluster2"},
 			}
 			count := table.Count(query)
 			Expect(count).To(Equal(0))
@@ -181,13 +180,27 @@ var _ = Describe("GormDatabase", func() {
 			table.Insert(&cluster)
 
 			cluster.Name = "New name"
-			table.Update(cluster)
+			table.Update(&cluster)
 
-			table.Find(Query{
-				Conditions: QueryConditions{"id": cluster.ID},
+			table.Find(db.Query{
+				Conditions: db.QueryConditions{"id": cluster.ID},
 			}, &clusterInDB)
 
 			Expect(clusterInDB.Name).To(Equal("New name"))
+		})
+	})
+
+	Describe("Insert()", func() {
+		It("creates a record", func() {
+			var count = 0
+			cluster := models.Cluster{Name: "cluster1"}
+			count = database.Clusters().Count(db.Query{})
+			Expect(count).To(Equal(0))
+
+			database.Clusters().Insert(&cluster)
+
+			count = database.Clusters().Count(db.Query{})
+			Expect(count).To(Equal(1))
 		})
 	})
 })

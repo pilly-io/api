@@ -1,30 +1,34 @@
 package db
 
 import (
+	"math"
+	"strings"
+	"time"
+
 	"github.com/astaxie/beego/orm"
 )
 
 type BeegoTable struct {
-	client orm.Ormer,
-	kind interface{},
-	queryTranslator &QueryTranslator
-	qs orm.QuerySeter
+	client          orm.Ormer
+	kind            interface{}
+	queryTranslator *QueryTranslator
+	qs              orm.QuerySeter
 }
 
 func NewBeegoTable(client orm.Ormer, kind interface{}) *BeegoTable {
 	qs := client.QueryTable(kind)
 	return &BeegoTable{
-		client: &client,
-		queryTranslator: &QueryTranslator{},
-		kind: kind,
-		qs: &qs
+		client:          client,
+		queryTranslator: &QueryTranslator{qs},
+		kind:            kind,
+		qs:              qs,
 	}
 }
 
 func (table *BeegoTable) Count(query Query) int {
-	qs := table.queryTranslator.Translate(query.Conditions)
-	count, _ = table.qs.Count()
-	return count
+	qs := table.queryTranslator.Translate(&query.Conditions)
+	count, _ := qs.Count()
+	return int(count)
 }
 
 func (table *BeegoTable) Update(object interface{}) error {
@@ -33,24 +37,22 @@ func (table *BeegoTable) Update(object interface{}) error {
 }
 
 func (table *BeegoTable) Exists(query Query) bool {
-	qs := table.queryTranslator.Translate(query.Conditions)
-	return qs.Exists()
+	qs := table.queryTranslator.Translate(&query.Conditions)
+	return qs.Exist()
 }
 
 func (table *BeegoTable) Insert(value interface{}) error {
-	_, err = client.Insert(value)
+	_, err := table.client.Insert(value)
 	return err
 }
 
 func (table *BeegoTable) Find(query Query, result interface{}) error {
-	qs := table.queryTranslator.Translate(query.Conditions)
+	qs := table.queryTranslator.Translate(&query.Conditions)
 	return qs.One(result)
 }
 
-
 func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationInfo, error) {
-	qs := table.qs
-
+	qs := table.queryTranslator.Translate(&query.Conditions)
 
 	if query.Interval != nil {
 		endCondition := orm.NewCondition()
@@ -80,8 +82,7 @@ func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationI
 		return nil, err
 	}
 
-	countQs := qs.Limit(nil).OrderBy(nil).Offset(nil)
-	count, err := countQs.Count()
+	count, err := qs.Count()
 	if err != nil {
 		return nil, err
 	}
@@ -91,14 +92,17 @@ func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationI
 		maxPage = int(math.Ceil(float64(count) / float64(query.Limit)))
 	}
 	return &PaginationInfo{
-		TotalCount:  count,
+		TotalCount:  int(count),
 		Limit:       query.Limit,
 		MaxPage:     maxPage,
 		CurrentPage: query.Page,
 	}, err
 }
 
-func (table *BeegoTable) Delete(query Query, soft bool) int64, error {
-	qs := table.queryTranslator.Translate(query.Conditions)
+func (table *BeegoTable) Delete(query Query, soft bool) (int64, error) {
+	qs := table.queryTranslator.Translate(&query.Conditions)
+	if soft {
+		return qs.Update(orm.Params{"delete_at": time.Now().UTC()})
+	}
 	return qs.Delete()
 }

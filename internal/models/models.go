@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
 const MetricCPUUsed = "CPU_USED"
@@ -24,10 +22,10 @@ type Resources struct {
 
 //Model : a copy of orm.Model with json annotations
 type Model struct {
-	ID        uint       `orm:"pk;column:id" json:"id"`
+	ID        uint       `orm:"pk;column(id);auto" json:"id"`
 	CreatedAt time.Time  `orm:"auto_now_add;type(datetime)" json:"created_at"`
 	UpdatedAt time.Time  `orm:"auto_now_add;type(datetime)" json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `orm:"null" json:"deleted_at"`
 }
 
 type Cluster struct {
@@ -42,22 +40,22 @@ type Cluster struct {
 
 type Node struct {
 	Model
-	InstanceType      string         `json:"instance_type"`
-	Region            string         `json:"region"`
-	Zone              string         `json:"zone"`
-	Hostname          string         `json:"hostname"`
-	UID               string         `json:"uid"`
-	KubernetesVersion string         `json:"kubernetes_version"`
-	OS                string         `json:"os"`
-	ClusterID         uint           `json:"cluster_id"`
-	Labels            postgres.Jsonb `json:"labels"`
+	InstanceType      string `json:"instance_type"`
+	Region            string `json:"region"`
+	Zone              string `json:"zone"`
+	Hostname          string `json:"hostname"`
+	UID               string `json:"uid"`
+	KubernetesVersion string `json:"kubernetes_version"`
+	OS                string `json:"os"`
+	ClusterID         uint   `json:"cluster_id"`
+	//Labels            postgres.Jsonb `json:"labels"`
 }
 
 type Namespace struct {
 	Model
-	Name      string         `json:"name"`
-	Labels    postgres.Jsonb `json:"labels"`
-	ClusterID uint           `json:"cluster_id"`
+	Name string `json:"name"`
+	//Labels    postgres.Jsonb `json:"labels"`
+	ClusterID uint `json:"cluster_id"`
 }
 
 type Metric struct {
@@ -71,11 +69,11 @@ type Metric struct {
 
 type Owner struct {
 	Model
-	Metrics   []Resources    `orm:"-" json:"metrics;omitempty"`
-	UID       string         `json:"uid"`
-	Name      string         `json:"name"`
-	Type      string         `json:"type"`
-	Namespace string         `json:"namespace"`
-	Labels    postgres.Jsonb `json:"labels"`
-	ClusterID uint           `json:"cluster_id"`
+	Metrics   []Resources `orm:"-" json:"metrics;omitempty"`
+	UID       string      `json:"uid"`
+	Name      string      `json:"name"`
+	Type      string      `json:"type"`
+	Namespace string      `json:"namespace"`
+	//Labels    postgres.Jsonb `json:"labels"`
+	ClusterID uint `json:"cluster_id"`
 }

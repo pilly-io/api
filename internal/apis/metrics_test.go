@@ -31,7 +31,6 @@ func MetricsFactory(database db.Database, clusterID uint, ownerUID string, name 
 		Value:     value,
 	}
 	metric.Model.CreatedAt = createdAt
-	fmt.Println(createdAt)
 	database.Metrics().Insert(&metric)
 	return metric
 }
@@ -194,7 +193,7 @@ var _ = Describe("Owners", func() {
 		})
 	})
 	Describe("ListMetrics() succeeds", func() {
-		It("Should return a 200 without the metrics of all the cluster", func() {
+		FIt("Should return a 200 without the metrics of all the cluster", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
