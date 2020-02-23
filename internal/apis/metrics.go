@@ -111,6 +111,14 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 		Interval:   &interval,
 	}
 	handler.DB.Owners().FindAll(query, &owners)
+	GetOwnerUIDs := func(owners []models.Owner) []string {
+		var uids []string
+		for _, owner := range owners {
+			uids = append(uids, owner.UID)
+		}
+		return uids
+	}
+	ownerUIDs = GetOwnerUIDs(owners)
 	//3. Get the metrics within the interval grouped by period
 	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), namespace, ownerUIDs, uint(period), interval)
 	metricsIndexed := indexMetrics(metrics)
