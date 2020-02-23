@@ -25,6 +25,6 @@ func (table *ClustersTable) Create(name string, provider string) (*models.Cluste
 		Provider: provider,
 		APIToken: uid.String(),
 	}
-	err := table.Insert(&cluster)
+	err := table.Insert(cluster)
 	return cluster, err
 }

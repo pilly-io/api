@@ -31,7 +31,7 @@ func MetricsFactory(database db.Database, clusterID uint, ownerUID string, name 
 		Value:     value,
 	}
 	metric.Model.CreatedAt = createdAt
-	database.Metrics().Insert(&metric)
+	database.Metrics().Insert(metric)
 	return metric
 }
 
@@ -48,7 +48,7 @@ func OwnerFactory(database db.Database, clusterID uint, name string, namespace s
 		UID:       uid.String(),
 	}
 	owner.Model.CreatedAt = past
-	database.Owners().Insert(&owner)
+	database.Owners().Insert(owner)
 	// TODO convert into a []{}
 	//1. Generate CPU metrics
 	metrics = append(metrics, MetricsFactory(database, clusterID, owner.UID, models.MetricCPUUsed, 1, past))

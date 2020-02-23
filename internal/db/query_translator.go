@@ -12,7 +12,7 @@ type QueryTranslator struct {
 func (translator QueryTranslator) Translate(conditions *QueryConditions) orm.QuerySeter {
 	qs := translator.qs
 	for key, value := range *conditions {
-		if key == "$or" {
+		if key == "or__" {
 			orQuerySet := translator.Translate(value.(*QueryConditions))
 			mergedCondition := qs.GetCond().AndCond(orQuerySet.GetCond())
 			qs = qs.SetCond(mergedCondition)
