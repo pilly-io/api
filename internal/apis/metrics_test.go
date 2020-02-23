@@ -35,6 +35,15 @@ func MetricsFactory(database db.Database, clusterID uint, ownerUID string, name 
 	return metric
 }
 
+//NamespaceFactory : create a namespace
+func NamespaceFactory(database db.Database, clusterID uint, name string) {
+	namespace := &models.Namespace{
+		ClusterID: clusterID,
+		Name:      name,
+	}
+	database.Namespaces().Insert(namespace)
+}
+
 //OwnerFactory : create an owner and generate its metrics
 func OwnerFactory(database db.Database, clusterID uint, name string, namespace string) (*models.Owner, []*models.Metric) {
 	var metrics []*models.Metric
@@ -88,6 +97,8 @@ var _ = Describe("Owners", func() {
 		engine = gin.New()
 		SetupRouter(engine, database)
 		cluster, _ = database.Clusters().Create("test", "aws")
+		NamespaceFactory(database, cluster.ID, "default")
+		NamespaceFactory(database, cluster.ID, "infrastructure")
 		OwnerFactory(database, cluster.ID, "tutum", "default")
 		OwnerFactory(database, cluster.ID, "falco", "infrastructure")
 
@@ -193,7 +204,7 @@ var _ = Describe("Owners", func() {
 		})
 	})
 	Describe("ListMetrics() succeeds", func() {
-		It("Should return a 200 without the metrics of all the cluster", func() {
+		PIt("Should return a 200 without the metrics of all the cluster", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
@@ -214,9 +225,50 @@ var _ = Describe("Owners", func() {
 			data := payload["data"].([]interface{})
 			Expect(data).To(HaveLen(2))
 		})
-		It("Should return a 200 without the metrics of a namespace", func() {
+		PIt("Should return a 200 without the metrics of a namespace", func() {
+			var payload jsonFormat
+			res := httptest.NewRecorder()
+			now := time.Now().Unix()
+
+			//2. Create the GET request
+			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
+			q := req.URL.Query()
+			q.Add("start", "1000")
+			q.Add("end", fmt.Sprintf("%d", now))
+			q.Add("period", "180")
+			q.Add("namespace", "infrastructure")
+			req.URL.RawQuery = q.Encode()
+			engine.ServeHTTP(res, req)
+
+			//3. Analyse the result
+			Expect(res.Code).To(Equal(200))
+			json.Unmarshal(res.Body.Bytes(), &payload)
+			data := payload["data"].([]interface{})
+			Expect(data).To(HaveLen(1))
 		})
-		It("Should return a 200 without the metrics of an owner", func() {
+		PIt("Should return a 200 without the metrics of an owner", func() {
+			var payload jsonFormat
+			res := httptest.NewRecorder()
+			now := time.Now().Unix()
+
+			//2. Create the GET request
+			url := fmt.Sprintf("/api/v1/clusters/%d/owners/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
+			q := req.URL.Query()
+			q.Add("start", "1000")
+			q.Add("end", fmt.Sprintf("%d", now))
+			q.Add("period", "180")
+			q.Add("namespace", "infrastructure")
+			q.Add("owners", "deploy/falco")
+			req.URL.RawQuery = q.Encode()
+			engine.ServeHTTP(res, req)
+
+			//3. Analyse the result
+			Expect(res.Code).To(Equal(200))
+			json.Unmarshal(res.Body.Bytes(), &payload)
+			data := payload["data"].([]interface{})
+			Expect(data).To(HaveLen(1))
 		})
 		It("Should return a 200 with different metrics depending of the period", func() {
 		})

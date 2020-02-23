@@ -19,7 +19,7 @@ type MetricsHandler struct {
 
 const MinPeriod = 60 // in seconds
 
-// ValidateRequest : Validate the cluster, interval, period
+// ValidateRequest : Validate the cluster, interval, period, namespace, owners
 func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 	clusterID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	var ownerUIDs []string
@@ -48,7 +48,7 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 	namespace := c.Query("namespace")
 	if namespace != "" {
 		query = db.Query{
-			Conditions: db.QueryConditions{"id": clusterID, "name": namespace},
+			Conditions: db.QueryConditions{"cluster_id": clusterID, "name": namespace},
 		}
 		if !handler.DB.Namespaces().Exists(query) {
 			c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("namespace_does_not_exist")))
@@ -65,15 +65,20 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 					owner := models.Owner{}
 					err := handler.DB.Metrics().Find(query, &owner)
 					if err == nil {
-						ownerUIDs = append(ownerUIDs, owner.UID) // append the owner object instead
+						ownerUIDs = append(ownerUIDs, owner.UID)
 					}
 				}
+			}
+			if len(ownerUIDs) == 0 {
+				c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("owners_do_not_exist")))
+				return false
 			}
 		}
 	}
 	c.Set("Start", *start)
 	c.Set("End", *end)
 	c.Set("Period", period)
+	c.Set("Namespace", namespace)
 	c.Set("OwnerUIDs", ownerUIDs)
 	return true
 }
@@ -94,8 +99,15 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 
 	//2. Get all the owners or specific ones
 	interval := db.QueryInterval{Start: start, End: end}
+	conditions := db.QueryConditions{"cluster_id": clusterID}
+	if namespace != "" {
+		conditions["namespace"] = namespace
+		if len(ownerUIDs) > 0 {
+			conditions["uid__in"] = ownerUIDs
+		}
+	}
 	query := db.Query{
-		Conditions: db.QueryConditions{"cluster_id": clusterID, "owner_uid__in": ownerUIDs},
+		Conditions: conditions,
 		Interval:   &interval,
 	}
 	handler.DB.Owners().FindAll(query, &owners)
