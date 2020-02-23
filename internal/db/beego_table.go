@@ -27,6 +27,9 @@ func NewBeegoTable(client orm.Ormer, kind interface{}) *BeegoTable {
 
 func (table *BeegoTable) Count(query Query) int {
 	qs := table.queryTranslator.Translate(&query.Conditions)
+	if !query.Hard {
+		qs = qs.Filter("deleted_at", nil)
+	}
 	count, _ := qs.Count()
 	return int(count)
 }
@@ -38,6 +41,9 @@ func (table *BeegoTable) Update(object interface{}) error {
 
 func (table *BeegoTable) Exists(query Query) bool {
 	qs := table.queryTranslator.Translate(&query.Conditions)
+	if !query.Hard {
+		qs = qs.Filter("deleted_at", nil)
+	}
 	return qs.Exist()
 }
 
@@ -48,12 +54,14 @@ func (table *BeegoTable) Insert(value interface{}) error {
 
 func (table *BeegoTable) Find(query Query, result interface{}) error {
 	qs := table.queryTranslator.Translate(&query.Conditions)
+	if !query.Hard {
+		qs = qs.Filter("deleted_at", nil)
+	}
 	return qs.One(result)
 }
 
 func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationInfo, error) {
 	qs := table.queryTranslator.Translate(&query.Conditions)
-
 	if query.Interval != nil {
 		endCondition := orm.NewCondition()
 		startCondition := orm.NewCondition()
@@ -62,6 +70,8 @@ func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationI
 			Or("deleted_at__gte", query.Interval.Start)
 
 		qs = qs.SetCond(endCondition.AndCond(startCondition))
+	} else if !query.Hard {
+		qs = qs.Filter("deleted_at", nil)
 	}
 
 	if query.Limit > 0 {

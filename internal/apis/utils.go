@@ -65,3 +65,23 @@ func ObjectToJSON(object interface{}) map[string]interface{} {
 		},
 	}
 }*/
+
+// GetFullKindName : Given a shortname retrieve the full name of the Kubernetes kind
+func GetFullKindName(shortname string) string {
+	switch shortname {
+	case "po":
+		return "pod"
+	case "sts":
+		return "statefulset"
+	case "dep", "deploy":
+		return "deployment"
+	case "rs":
+		return "replicaset"
+	case "cj":
+		return "cronjob"
+	case "ds":
+		return "daemonset"
+	default:
+		return shortname
+	}
+}

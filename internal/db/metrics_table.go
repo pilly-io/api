@@ -19,7 +19,6 @@ func NewMetricsTable(client orm.Ormer, model models.Metric) *MetricsTable {
 // FindAll returns all the metrics using an average on a specific period
 func (table *MetricsTable) FindAll(clusterID uint, period uint, queryInterval QueryInterval) (*[]models.Metric, error) {
 	var results []models.Metric
-	//builder = builder.Select("AVG(value)").Select("to_timestamp(floor((extract('epoch' from created_at) / 180 )) * 180)  AT TIME ZONE 'UTC' as period")
 	_, err := table.client.Raw(`
 	SELECT AVG(value) as value, name, owner_uid, cluster_id,
 	to_timestamp(floor((extract('epoch' from created_at) / ? )) * ?)  AT TIME ZONE 'UTC' as period

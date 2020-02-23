@@ -22,6 +22,7 @@ type Query struct {
 	Limit      int
 	OrderBy    string
 	Page       int
+	Hard       bool //TODO: rename
 }
 
 // Database interface

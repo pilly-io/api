@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -52,6 +53,15 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 		if !handler.DB.Namespaces().Exists(query) {
 			c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("namespace_does_not_exist")))
 			return false
+		}
+
+		if c.Query("owners") != "" {
+			for _, owner := range strings.Split(c.Query("owners"), ",") {
+				details := strings.Split(owner, "/")
+				if len(details) == 2 {
+					//kind := GetFullKindName(details[0])
+				}
+			}
 		}
 	}
 	c.Set("Start", *start)
