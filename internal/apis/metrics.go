@@ -54,12 +54,19 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 			c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("namespace_does_not_exist")))
 			return false
 		}
-
 		if c.Query("owners") != "" {
 			for _, owner := range strings.Split(c.Query("owners"), ",") {
 				details := strings.Split(owner, "/")
 				if len(details) == 2 {
-					//kind := GetFullKindName(details[0])
+					kind := GetFullKindName(details[0])
+					query = db.Query{
+						Conditions: db.QueryConditions{"cluster_id": clusterID, "namespace": namespace, "type": kind, "name": details[1]},
+					}
+					owner := models.Owner{}
+					err := handler.DB.Metrics().Find(query, &owner)
+					if err == nil {
+						ownerUIDs = append(ownerUIDs, owner.UID) // append the owner object instead
+					}
 				}
 			}
 		}
@@ -81,17 +88,19 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 	start := c.Value("Start").(time.Time)
 	end := c.Value("End").(time.Time)
 	clusterID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	namespace := c.Query("namespace")
 	period := c.Value("Period").(int64)
+	ownerUIDs := c.Value("OwnerUIDs").([]string)
 
 	//2. Get all the owners or specific ones
 	interval := db.QueryInterval{Start: start, End: end}
 	query := db.Query{
-		Conditions: db.QueryConditions{"cluster_id": clusterID},
+		Conditions: db.QueryConditions{"cluster_id": clusterID, "owner_uid__in": ownerUIDs},
 		Interval:   &interval,
 	}
 	handler.DB.Owners().FindAll(query, &owners)
 	//3. Get the metrics within the interval grouped by period
-	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), uint(period), interval)
+	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), namespace, ownerUIDs, uint(period), interval)
 	metricsIndexed := indexMetrics(metrics)
 	//4. Compute the owners resources
 	handler.DB.Owners().ComputeResources(&owners, metricsIndexed)

@@ -34,7 +34,7 @@ type Cluster struct {
 	Name       string `orm:"unique" json:"name"`
 	Provider   string `orm:"null" json:"provider"`
 	Region     string `orm:"null" json:"region"`
-	APIToken   string `orm:"null" json:"api_token"`
+	APIToken   string `orm:"null;column(api_token)" json:"api_token"`
 	NodesCount int    `orm:"null" json:"nodes_count"`
 }
 
@@ -44,10 +44,10 @@ type Node struct {
 	Region            string `json:"region"`
 	Zone              string `json:"zone"`
 	Hostname          string `json:"hostname"`
-	UID               string `json:"uid"`
+	UID               string `orm:"column(uid)" json:"uid"`
 	KubernetesVersion string `json:"kubernetes_version"`
-	OS                string `json:"os"`
-	ClusterID         uint   `json:"cluster_id"`
+	OS                string `orm:"column(os)" json:"os"`
+	ClusterID         uint   `orm:"column(cluster_id)" json:"cluster_id"`
 	//Labels            postgres.Jsonb `json:"labels"`
 }
 
@@ -55,25 +55,26 @@ type Namespace struct {
 	Model
 	Name string `json:"name"`
 	//Labels    postgres.Jsonb `json:"labels"`
-	ClusterID uint `json:"cluster_id"`
+	ClusterID uint `orm:"column(cluster_id)" json:"cluster_id"`
 }
 
 type Metric struct {
 	Model
 	Name      string    `json:"metric_name"`
+	Namespace string    `json:"namespace"`
 	Value     float64   `json:"metric_value"`
-	OwnerUID  string    `json:"owner_uid"`
-	ClusterID uint      `json:"cluster_id"`
+	OwnerUID  string    `orm:"column(owner_uid)" json:"owner_uid"`
+	ClusterID uint      `orm:"column(cluster_id)" json:"cluster_id"`
 	Period    time.Time `orm:"-"`
 }
 
 type Owner struct {
 	Model
 	Metrics   []Resources `orm:"-" json:"metrics;omitempty"`
-	UID       string      `json:"uid"`
+	UID       string      `orm:"column(uid)" json:"uid"`
 	Name      string      `json:"name"`
 	Type      string      `json:"type"`
 	Namespace string      `json:"namespace"`
 	//Labels    postgres.Jsonb `json:"labels"`
-	ClusterID uint `json:"cluster_id"`
+	ClusterID uint `orm:"column(cluster_id)" json:"cluster_id"`
 }
