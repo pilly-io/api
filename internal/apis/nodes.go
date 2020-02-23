@@ -20,7 +20,6 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 	nodesTable := handler.DB.Nodes()
 	c.BindJSON(&nodes)
 
-	fmt.Println(nodes)
 	cluster := c.MustGet("cluster").(*models.Cluster)
 
 	existingNodesQuery := db.Query{
@@ -29,7 +28,7 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 
 	nodesTable.FindAll(existingNodesQuery, &existingNodes)
 	existingNodesByUID := indexNodesByUID(&existingNodes)
-	//nodesByUID := indexNodesByUID(&nodes)
+	nodesByUID := indexNodesByUID(&nodes)
 
 	// Merge nodes infos beased on their UID
 	for _, node := range nodes {
@@ -47,17 +46,22 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 	}
 
 	// Mark nodes as deleted if not received
-	/*nodeIDsToDelete := make([]uint)
+	nodeIDsToDelete := make([]uint, 0)
 	for _, existingNode := range existingNodes {
 		if _, ok := nodesByUID[existingNode.UID]; ok == false {
 			nodeIDsToDelete = append(nodeIDsToDelete, existingNode.ID)
 		}
 	}
-	nodesTable.DeleteWhere(db.Query{
-		Conditions: db.QueryConditions{
-			"id__in": nodeIDsToDelete,
-		},
-	})*/
+	fmt.Println(existingNodes)
+	fmt.Println(nodes)
+	fmt.Println(nodeIDsToDelete)
+	if len(nodeIDsToDelete) > 0 {
+		nodesTable.Delete(db.Query{
+			Conditions: db.QueryConditions{
+				"id__in": nodeIDsToDelete,
+			},
+		}, true)
+	}
 
 	// Update cluster's nodes count and region if not set
 	cluster.NodesCount = len(nodes)
@@ -65,7 +69,7 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 		cluster.Region = nodes[0].Region
 	}
 
-	handler.DB.Clusters().Update(&cluster)
+	handler.DB.Clusters().Update(cluster)
 	c.JSON(http.StatusCreated, ObjectToJSON(nil))
 }
 

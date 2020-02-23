@@ -1,10 +1,18 @@
 package apis
 
 import (
+	"bytes"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pilly-io/api/internal/apis/middlewares"
+	"github.com/pilly-io/api/internal/db"
+	"github.com/pilly-io/api/internal/models"
+	"github.com/pilly-io/api/internal/tests"
 )
 
 func TestNodesHandler(t *testing.T) {
@@ -13,7 +21,7 @@ func TestNodesHandler(t *testing.T) {
 }
 
 var _ = Describe("NodesHandler", func() {
-	/*var (
+	var (
 		engine   *gin.Engine
 		database db.Database
 		cluster  *models.Cluster
@@ -65,14 +73,14 @@ var _ = Describe("NodesHandler", func() {
 				},
 			}
 
-			database.Nodes().Find(clusterQuery, &clusterFromDB)
+			database.Clusters().Find(clusterQuery, &clusterFromDB)
 			Expect(clusterFromDB.NodesCount).To(Equal(0))
 
 			req, _ := http.NewRequest("POST", "/api/v1/collector/nodes", bytes.NewBuffer(data))
 			req.Header.Set(middlewares.ClusterAuthHeaderName, cluster.APIToken)
 			engine.ServeHTTP(res, req)
 
-			database.Nodes().Find(clusterQuery, &clusterFromDB)
+			database.Clusters().Find(clusterQuery, &clusterFromDB)
 			Expect(clusterFromDB.NodesCount).To(Equal(1))
 		})
 
@@ -87,19 +95,19 @@ var _ = Describe("NodesHandler", func() {
 				},
 			}
 
-			database.Nodes().Find(clusterQuery, &clusterFromDB)
+			database.Clusters().Find(clusterQuery, &clusterFromDB)
 			Expect(clusterFromDB.Region).To(Equal(""))
 
 			req, _ := http.NewRequest("POST", "/api/v1/collector/nodes", bytes.NewBuffer(data))
 			req.Header.Set(middlewares.ClusterAuthHeaderName, cluster.APIToken)
 			engine.ServeHTTP(res, req)
 
-			database.Nodes().Find(clusterQuery, &clusterFromDB)
+			database.Clusters().Find(clusterQuery, &clusterFromDB)
 			Expect(clusterFromDB.Region).To(Equal("euwest1"))
 		})
 
 		It("should mark nodes as deleted if not sent", func() {
-			deletedNode := models.Node{UID: "cbd46a8e-faa1-4f2a-a826-f45169d5ba14"}
+			deletedNode := models.Node{UID: "cbd46a8e-faa1-4f2a-a826-f45169d5ba14", ClusterID: cluster.ID}
 			database.Nodes().Insert(&deletedNode)
 
 			Expect(deletedNode.DeletedAt).To(BeNil())
@@ -114,7 +122,8 @@ var _ = Describe("NodesHandler", func() {
 			database.Nodes().Find(db.Query{
 				Conditions: db.QueryConditions{"id": deletedNode.ID},
 			}, &deletedNode)
+
 			Expect(deletedNode.DeletedAt).ToNot(BeNil())
 		})
-	})*/
+	})
 })

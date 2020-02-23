@@ -27,7 +27,7 @@ func NewBeegoTable(client orm.Ormer, kind interface{}) *BeegoTable {
 
 func (table *BeegoTable) Count(query Query) int {
 	qs := table.queryTranslator.Translate(&query.Conditions)
-	if !query.Hard {
+	if query.ExcludeDeleted {
 		qs = qs.Filter("deleted_at__isnull", true)
 	}
 	count, _ := qs.Count()
@@ -41,7 +41,7 @@ func (table *BeegoTable) Update(object interface{}) error {
 
 func (table *BeegoTable) Exists(query Query) bool {
 	qs := table.queryTranslator.Translate(&query.Conditions)
-	if !query.Hard {
+	if query.ExcludeDeleted {
 		qs = qs.Filter("deleted_at__isnull", true)
 	}
 	return qs.Exist()
@@ -54,7 +54,7 @@ func (table *BeegoTable) Insert(value interface{}) error {
 
 func (table *BeegoTable) Find(query Query, result interface{}) error {
 	qs := table.queryTranslator.Translate(&query.Conditions)
-	if !query.Hard {
+	if query.ExcludeDeleted {
 		qs = qs.Filter("deleted_at__isnull", true)
 	}
 	return qs.One(result)
@@ -70,7 +70,7 @@ func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationI
 			Or("deleted_at__gte", query.Interval.Start)
 
 		qs = qs.SetCond(endCondition.AndCond(startCondition))
-	} else if !query.Hard {
+	} else if query.ExcludeDeleted {
 		qs = qs.Filter("deleted_at__isnull", true)
 	}
 
@@ -112,7 +112,7 @@ func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationI
 func (table *BeegoTable) Delete(query Query, soft bool) (int64, error) {
 	qs := table.queryTranslator.Translate(&query.Conditions)
 	if soft {
-		return qs.Update(orm.Params{"delete_at": time.Now().UTC()})
+		return qs.Update(orm.Params{"deleted_at": time.Now().UTC()})
 	}
 	return qs.Filter("id__isnull", false).Delete()
 }

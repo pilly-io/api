@@ -17,12 +17,12 @@ type QueryInterval struct {
 }
 
 type Query struct {
-	Conditions QueryConditions
-	Interval   *QueryInterval
-	Limit      int
-	OrderBy    string
-	Page       int
-	Hard       bool //TODO: rename
+	Conditions     QueryConditions
+	Interval       *QueryInterval
+	Limit          int
+	OrderBy        string
+	Page           int
+	ExcludeDeleted bool
 }
 
 // Database interface

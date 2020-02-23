@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +21,6 @@ func CluserAuthMiddleware(table *db.ClustersTable) gin.HandlerFunc {
 		}
 		if err := table.Find(query, &cluster); err == nil {
 			c.Set("cluster", &cluster)
-			fmt.Println(cluster.Name)
 			c.Next()
 		} else {
 			c.AbortWithStatus(http.StatusUnauthorized)

@@ -45,7 +45,6 @@ func NewBeegoDatabase(uri string) *BeegoDatabase {
 
 // Migrate sync the schemas of the DB
 func (db *BeegoDatabase) Migrate() {
-	//db.AutoMigrate(&models.Cluster{}, &models.Node{}, &models.Namespace{}, &models.Owner{}, models.Metric{})
 	orm.RunSyncdb(dbAlias, true, true)
 }
 
