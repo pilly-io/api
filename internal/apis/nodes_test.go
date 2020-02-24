@@ -39,7 +39,7 @@ var _ = Describe("NodesHandler", func() {
 	})
 
 	Describe("Sync()", func() {
-		It("should create node if does not exist", func() {
+		FIt("should create node if does not exist", func() {
 			data := tests.LoadFile("testdata/nodes.json")
 			res := httptest.NewRecorder()
 
@@ -62,7 +62,7 @@ var _ = Describe("NodesHandler", func() {
 			Expect(res.Code).To(Equal(201))
 		})
 
-		It("should update nodes count of cluster", func() {
+		FIt("should update nodes count of cluster", func() {
 			var clusterFromDB models.Cluster
 			data := tests.LoadFile("testdata/nodes.json")
 			res := httptest.NewRecorder()
@@ -84,7 +84,7 @@ var _ = Describe("NodesHandler", func() {
 			Expect(clusterFromDB.NodesCount).To(Equal(1))
 		})
 
-		It("should update region of cluster if not set", func() {
+		FIt("should update region of cluster if not set", func() {
 			var clusterFromDB models.Cluster
 			data := tests.LoadFile("testdata/nodes.json")
 			res := httptest.NewRecorder()
@@ -106,7 +106,7 @@ var _ = Describe("NodesHandler", func() {
 			Expect(clusterFromDB.Region).To(Equal("euwest1"))
 		})
 
-		It("should mark nodes as deleted if not sent", func() {
+		FIt("should mark nodes as deleted if not sent", func() {
 			deletedNode := models.Node{UID: "cbd46a8e-faa1-4f2a-a826-f45169d5ba14", ClusterID: cluster.ID}
 			database.Nodes().Insert(&deletedNode)
 

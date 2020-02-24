@@ -18,7 +18,9 @@ type NodesHandler struct {
 func (handler *NodesHandler) Sync(c *gin.Context) {
 	var nodes, existingNodes []models.Node
 	nodesTable := handler.DB.Nodes()
-	c.BindJSON(&nodes)
+	err := c.BindJSON(&nodes)
+	fmt.Println(err)
+	fmt.Println(nodes)
 
 	cluster := c.MustGet("cluster").(*models.Cluster)
 
@@ -52,9 +54,6 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 			nodeIDsToDelete = append(nodeIDsToDelete, existingNode.ID)
 		}
 	}
-	fmt.Println(existingNodes)
-	fmt.Println(nodes)
-	fmt.Println(nodeIDsToDelete)
 	if len(nodeIDsToDelete) > 0 {
 		nodesTable.Delete(db.Query{
 			Conditions: db.QueryConditions{

@@ -2,10 +2,12 @@ package db
 
 import (
 	"math"
+	"reflect"
 	"strings"
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/pilly-io/api/internal/models"
 )
 
 type BeegoTable struct {
@@ -35,6 +37,7 @@ func (table *BeegoTable) Count(query Query) int {
 }
 
 func (table *BeegoTable) Update(object interface{}) error {
+	// object.(models.Model).BeforeSave()
 	_, err := table.client.Update(object)
 	return err
 }
@@ -101,6 +104,13 @@ func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationI
 	if query.Limit > 0 {
 		maxPage = int(math.Ceil(float64(count) / float64(query.Limit)))
 	}
+
+	objects := reflect.ValueOf(results)
+	for i := 0; i < objects.Elem().Len(); i++ {
+		model := reflect.Indirect(objects).Index(i).Interface().(models.Model)
+		model.AfterLoad()
+	}
+
 	return &PaginationInfo{
 		TotalCount:  int(count),
 		Limit:       query.Limit,

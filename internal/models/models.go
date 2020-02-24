@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -40,15 +41,16 @@ type Cluster struct {
 
 type Node struct {
 	Model
-	InstanceType      string `json:"instance_type"`
-	Region            string `json:"region"`
-	Zone              string `json:"zone"`
-	Hostname          string `json:"hostname"`
-	UID               string `orm:"column(uid)" json:"uid"`
-	KubernetesVersion string `json:"kubernetes_version"`
-	OS                string `orm:"column(os)" json:"os"`
-	ClusterID         uint   `orm:"column(cluster_id)" json:"cluster_id"`
-	//Labels            postgres.Jsonb `json:"labels"`
+	InstanceType      string                 `json:"instance_type"`
+	Region            string                 `json:"region"`
+	Zone              string                 `json:"zone"`
+	Hostname          string                 `json:"hostname"`
+	UID               string                 `orm:"column(uid)" json:"uid"`
+	KubernetesVersion string                 `json:"kubernetes_version"`
+	OS                string                 `orm:"column(os)" json:"os"`
+	ClusterID         uint                   `orm:"column(cluster_id)" json:"cluster_id"`
+	Labels            map[string]interface{} `orm:"-" json:"labels"`
+	LabelsAsString    string                 `orm:"type(jsonb),column(labels)" json:"-"`
 }
 
 type Namespace struct {
@@ -76,4 +78,25 @@ type Owner struct {
 	Namespace string      `json:"namespace"`
 	//Labels    postgres.Jsonb `json:"labels"`
 	ClusterID uint `orm:"column(cluster_id)" json:"cluster_id"`
+}
+
+// AfterLoad is called after loading object from DB
+func (object *Model) AfterLoad() {
+
+}
+
+// AfterLoad is called before saving object into DB
+func (object *Model) BeforeSave() {
+
+}
+
+func (node *Node) AfterLoad() {
+	var labels map[string]interface{}
+	json.Unmarshal([]byte(node.LabelsAsString), &labels)
+	node.Labels = labels
+}
+
+func (node *Node) BeforeSave() {
+	labelsStr, _ := json.Marshal(node.Labels)
+	node.LabelsAsString = string(labelsStr)
 }
