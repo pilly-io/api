@@ -69,7 +69,7 @@ func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationI
 		startCondition = startCondition.And("deleted_at__isnull", true).
 			Or("deleted_at__gte", query.Interval.Start)
 
-		qs = qs.SetCond(endCondition.AndCond(startCondition))
+		qs = qs.SetCond(qs.GetCond().AndCond(endCondition.AndCond(startCondition)))
 	} else if query.ExcludeDeleted {
 		qs = qs.Filter("deleted_at__isnull", true)
 	}

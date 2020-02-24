@@ -63,7 +63,7 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 						Conditions: db.QueryConditions{"cluster_id": clusterID, "namespace": namespace, "type": kind, "name": details[1]},
 					}
 					owner := models.Owner{}
-					err := handler.DB.Metrics().Find(query, &owner)
+					err := handler.DB.Owners().Find(query, &owner)
 					if err == nil {
 						ownerUIDs = append(ownerUIDs, owner.UID)
 					}
@@ -120,7 +120,7 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 	}
 	ownerUIDs = GetOwnerUIDs(owners)
 	//3. Get the metrics within the interval grouped by period
-	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), namespace, ownerUIDs, uint(period), interval)
+	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), ownerUIDs, uint(period), interval)
 	metricsIndexed := indexMetrics(metrics)
 	//4. Compute the owners resources
 	handler.DB.Owners().ComputeResources(&owners, metricsIndexed)

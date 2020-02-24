@@ -204,7 +204,7 @@ var _ = Describe("Owners", func() {
 		})
 	})
 	Describe("ListMetrics() succeeds", func() {
-		PIt("Should return a 200 without the metrics of all the cluster", func() {
+		It("Should return a 200 without the metrics of all the cluster", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
@@ -225,7 +225,7 @@ var _ = Describe("Owners", func() {
 			data := payload["data"].([]interface{})
 			Expect(data).To(HaveLen(2))
 		})
-		PIt("Should return a 200 without the metrics of a namespace", func() {
+		It("Should return a 200 without the metrics of a namespace", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
@@ -247,7 +247,7 @@ var _ = Describe("Owners", func() {
 			data := payload["data"].([]interface{})
 			Expect(data).To(HaveLen(1))
 		})
-		PIt("Should return a 200 without the metrics of an owner", func() {
+		It("Should return a 200 without the metrics of an owner", func() {
 			var payload jsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
