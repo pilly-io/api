@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 	"strings"
@@ -36,9 +37,11 @@ func (table *BeegoTable) Count(query Query) int {
 	return int(count)
 }
 
-func (table *BeegoTable) Update(object interface{}) error {
-	// object.(models.Model).BeforeSave()
-	_, err := table.client.Update(object)
+func (table *BeegoTable) Update(value interface{}) error {
+	// object := reflect.Indirect(reflect.ValueOf(value))
+	// reflect.PtrTo(object).(models.PersistedModel).BeforeSave()
+	// object.Addr().(models.PersistedModel).BeforeSave()
+	_, err := table.client.Update(value)
 	return err
 }
 
@@ -51,6 +54,12 @@ func (table *BeegoTable) Exists(query Query) bool {
 }
 
 func (table *BeegoTable) Insert(value interface{}) error {
+	objectPtr := reflect.ValueOf(value)
+	(&(objectPtr.Elem()).(models.PersistedModel)).BeforeSave()
+	fmt.Println(reflect.ValueOf(value))
+	// object := reflect.Indirect(reflect.ValueOf(value))
+	// object.Addr().(models.PersistedModel).BeforeSave()
+	// reflect.PtrTo(object).(models.PersistedModel).BeforeSave()
 	_, err := table.client.Insert(value)
 	return err
 }
@@ -60,7 +69,12 @@ func (table *BeegoTable) Find(query Query, result interface{}) error {
 	if query.ExcludeDeleted {
 		qs = qs.Filter("deleted_at__isnull", true)
 	}
-	return qs.One(result)
+	err := qs.One(result)
+	if err != nil {
+		return err
+	}
+	result.(models.PersistedModel).AfterLoad()
+	return nil
 }
 
 func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationInfo, error) {
@@ -107,7 +121,7 @@ func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationI
 
 	objects := reflect.ValueOf(results)
 	for i := 0; i < objects.Elem().Len(); i++ {
-		model := reflect.Indirect(objects).Index(i).Interface().(models.Model)
+		model := reflect.Indirect(objects).Index(i).Interface().(models.PersistedModel)
 		model.AfterLoad()
 	}
 

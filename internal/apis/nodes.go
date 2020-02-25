@@ -18,9 +18,7 @@ type NodesHandler struct {
 func (handler *NodesHandler) Sync(c *gin.Context) {
 	var nodes, existingNodes []models.Node
 	nodesTable := handler.DB.Nodes()
-	err := c.BindJSON(&nodes)
-	fmt.Println(err)
-	fmt.Println(nodes)
+	c.BindJSON(&nodes)
 
 	cluster := c.MustGet("cluster").(*models.Cluster)
 
@@ -36,9 +34,13 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 	for _, node := range nodes {
 		node.ClusterID = cluster.ID
 		existingNode, ok := existingNodesByUID[node.UID]
+		fmt.Printf("okokoko, %t", ok)
+		fmt.Println(existingNodes)
+		fmt.Println(node.UID)
 		if ok {
-			//existingNode.Labels = node.Labels
-			nodesTable.Update(existingNode)
+			existingNode.Labels = node.Labels
+			fmt.Println(node.Labels)
+			nodesTable.Update(&existingNode)
 		} else {
 			err := nodesTable.Insert(&node)
 			if err != nil {

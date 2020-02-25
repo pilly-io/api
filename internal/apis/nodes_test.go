@@ -2,6 +2,7 @@ package apis
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -39,7 +40,7 @@ var _ = Describe("NodesHandler", func() {
 	})
 
 	Describe("Sync()", func() {
-		FIt("should create node if does not exist", func() {
+		It("should create node if does not exist", func() {
 			data := tests.LoadFile("testdata/nodes.json")
 			res := httptest.NewRecorder()
 
@@ -62,7 +63,7 @@ var _ = Describe("NodesHandler", func() {
 			Expect(res.Code).To(Equal(201))
 		})
 
-		FIt("should update nodes count of cluster", func() {
+		It("should update nodes count of cluster", func() {
 			var clusterFromDB models.Cluster
 			data := tests.LoadFile("testdata/nodes.json")
 			res := httptest.NewRecorder()
@@ -84,7 +85,7 @@ var _ = Describe("NodesHandler", func() {
 			Expect(clusterFromDB.NodesCount).To(Equal(1))
 		})
 
-		FIt("should update region of cluster if not set", func() {
+		It("should update region of cluster if not set", func() {
 			var clusterFromDB models.Cluster
 			data := tests.LoadFile("testdata/nodes.json")
 			res := httptest.NewRecorder()
@@ -106,7 +107,7 @@ var _ = Describe("NodesHandler", func() {
 			Expect(clusterFromDB.Region).To(Equal("euwest1"))
 		})
 
-		FIt("should mark nodes as deleted if not sent", func() {
+		It("should mark nodes as deleted if not sent", func() {
 			deletedNode := models.Node{UID: "cbd46a8e-faa1-4f2a-a826-f45169d5ba14", ClusterID: cluster.ID}
 			database.Nodes().Insert(&deletedNode)
 
@@ -124,6 +125,33 @@ var _ = Describe("NodesHandler", func() {
 			}, &deletedNode)
 
 			Expect(deletedNode.DeletedAt).ToNot(BeNil())
+		})
+
+		FIt("should update current nodes with new labels", func() {
+			currentNode := models.Node{
+				UID:       "816d2d42-4dd0-4e05-97eb-f077983b73dc",
+				ClusterID: cluster.ID,
+				Labels: map[string]interface{}{
+					"key1": "oldVal",
+				},
+			}
+			err := database.Nodes().Insert(&currentNode)
+			fmt.Println(err)
+
+			data := tests.LoadFile("testdata/nodes.json")
+			res := httptest.NewRecorder()
+
+			req, _ := http.NewRequest("POST", "/api/v1/collector/nodes", bytes.NewBuffer(data))
+			req.Header.Set(middlewares.ClusterAuthHeaderName, cluster.APIToken)
+			engine.ServeHTTP(res, req)
+
+			database.Nodes().Find(db.Query{
+				Conditions: db.QueryConditions{"id": currentNode.ID},
+			}, &currentNode)
+
+			Expect(currentNode.Labels).To(Equal(map[string]interface{}{
+				"key1": "val1",
+			}))
 		})
 	})
 })

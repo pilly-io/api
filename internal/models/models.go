@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -50,7 +51,7 @@ type Node struct {
 	OS                string                 `orm:"column(os)" json:"os"`
 	ClusterID         uint                   `orm:"column(cluster_id)" json:"cluster_id"`
 	Labels            map[string]interface{} `orm:"-" json:"labels"`
-	LabelsAsString    string                 `orm:"type(jsonb),column(labels)" json:"-"`
+	LabelsAsString    string                 `orm:"type(jsonb);column(labels)" json:"-"`
 }
 
 type Namespace struct {
@@ -80,6 +81,11 @@ type Owner struct {
 	ClusterID uint `orm:"column(cluster_id)" json:"cluster_id"`
 }
 
+type PersistedModel interface {
+	AfterLoad()
+	BeforeSave()
+}
+
 // AfterLoad is called after loading object from DB
 func (object *Model) AfterLoad() {
 
@@ -98,5 +104,6 @@ func (node *Node) AfterLoad() {
 
 func (node *Node) BeforeSave() {
 	labelsStr, _ := json.Marshal(node.Labels)
+	fmt.Println(labelsStr)
 	node.LabelsAsString = string(labelsStr)
 }
