@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
@@ -51,7 +50,7 @@ type Node struct {
 	OS                string                 `orm:"column(os)" json:"os"`
 	ClusterID         uint                   `orm:"column(cluster_id)" json:"cluster_id"`
 	Labels            map[string]interface{} `orm:"-" json:"labels"`
-	LabelsAsString    string                 `orm:"type(jsonb);column(labels)" json:"-"`
+	LabelsAsString    string                 `orm:"type(jsonb);column(labels);null" json:"-"`
 }
 
 type Namespace struct {
@@ -98,12 +97,12 @@ func (object *Model) BeforeSave() {
 
 func (node *Node) AfterLoad() {
 	var labels map[string]interface{}
+
 	json.Unmarshal([]byte(node.LabelsAsString), &labels)
 	node.Labels = labels
 }
 
 func (node *Node) BeforeSave() {
 	labelsStr, _ := json.Marshal(node.Labels)
-	fmt.Println(labelsStr)
 	node.LabelsAsString = string(labelsStr)
 }

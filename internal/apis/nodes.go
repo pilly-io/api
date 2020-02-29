@@ -1,7 +1,6 @@
 package apis
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +15,7 @@ type NodesHandler struct {
 
 // Sync synchronize nodes of cluster
 func (handler *NodesHandler) Sync(c *gin.Context) {
-	var nodes, existingNodes []models.Node
+	var nodes, existingNodes []*models.Node
 	nodesTable := handler.DB.Nodes()
 	c.BindJSON(&nodes)
 
@@ -34,15 +33,11 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 	for _, node := range nodes {
 		node.ClusterID = cluster.ID
 		existingNode, ok := existingNodesByUID[node.UID]
-		fmt.Printf("okokoko, %t", ok)
-		fmt.Println(existingNodes)
-		fmt.Println(node.UID)
 		if ok {
 			existingNode.Labels = node.Labels
-			fmt.Println(node.Labels)
 			nodesTable.Update(&existingNode)
 		} else {
-			err := nodesTable.Insert(&node)
+			err := nodesTable.Insert(node)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusBadRequest, ErrorsToJSON(err))
 			}
@@ -74,10 +69,10 @@ func (handler *NodesHandler) Sync(c *gin.Context) {
 	c.JSON(http.StatusCreated, ObjectToJSON(nil))
 }
 
-func indexNodesByUID(nodes *[]models.Node) map[string]models.Node {
+func indexNodesByUID(nodes *[]*models.Node) map[string]models.Node {
 	nodesByUID := make(map[string]models.Node)
 	for _, node := range *nodes {
-		nodesByUID[node.UID] = node
+		nodesByUID[node.UID] = *node
 	}
 	return nodesByUID
 }

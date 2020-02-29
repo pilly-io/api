@@ -127,7 +127,7 @@ var _ = Describe("NodesHandler", func() {
 			Expect(deletedNode.DeletedAt).ToNot(BeNil())
 		})
 
-		FIt("should update current nodes with new labels", func() {
+		It("should update current nodes with new labels", func() {
 			currentNode := models.Node{
 				UID:       "816d2d42-4dd0-4e05-97eb-f077983b73dc",
 				ClusterID: cluster.ID,

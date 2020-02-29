@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"math"
 	"reflect"
 	"strings"
@@ -37,14 +36,6 @@ func (table *BeegoTable) Count(query Query) int {
 	return int(count)
 }
 
-func (table *BeegoTable) Update(value interface{}) error {
-	// object := reflect.Indirect(reflect.ValueOf(value))
-	// reflect.PtrTo(object).(models.PersistedModel).BeforeSave()
-	// object.Addr().(models.PersistedModel).BeforeSave()
-	_, err := table.client.Update(value)
-	return err
-}
-
 func (table *BeegoTable) Exists(query Query) bool {
 	qs := table.queryTranslator.Translate(&query.Conditions)
 	if query.ExcludeDeleted {
@@ -54,13 +45,14 @@ func (table *BeegoTable) Exists(query Query) bool {
 }
 
 func (table *BeegoTable) Insert(value interface{}) error {
-	objectPtr := reflect.ValueOf(value)
-	(&(objectPtr.Elem()).(models.PersistedModel)).BeforeSave()
-	fmt.Println(reflect.ValueOf(value))
-	// object := reflect.Indirect(reflect.ValueOf(value))
-	// object.Addr().(models.PersistedModel).BeforeSave()
-	// reflect.PtrTo(object).(models.PersistedModel).BeforeSave()
+	value.(models.PersistedModel).BeforeSave()
 	_, err := table.client.Insert(value)
+	return err
+}
+
+func (table *BeegoTable) Update(value interface{}) error {
+	value.(models.PersistedModel).BeforeSave()
+	_, err := table.client.Update(value)
 	return err
 }
 
@@ -119,9 +111,9 @@ func (table *BeegoTable) FindAll(query Query, results interface{}) (*PaginationI
 		maxPage = int(math.Ceil(float64(count) / float64(query.Limit)))
 	}
 
-	objects := reflect.ValueOf(results)
-	for i := 0; i < objects.Elem().Len(); i++ {
-		model := reflect.Indirect(objects).Index(i).Interface().(models.PersistedModel)
+	objects := reflect.Indirect(reflect.ValueOf(results))
+	for i := 0; i < objects.Len(); i++ {
+		model := objects.Index(i).Interface().(models.PersistedModel)
 		model.AfterLoad()
 	}
 
