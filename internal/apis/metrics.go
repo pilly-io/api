@@ -129,6 +129,7 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 }
 
 //indexMetrics : this is ugly but life is ugly
+// Given a list of metrics, convert it to a IndexedMetrics type
 func indexMetrics(metrics *[]models.Metric) *models.IndexedMetrics {
 	metricsIndexed := make(models.IndexedMetrics)
 	for _, metric := range *metrics {

@@ -84,7 +84,7 @@ func OwnerFactory(database db.Database, clusterID uint, name string, namespace s
 	return owner, metrics
 }
 
-var _ = Describe("Owners", func() {
+var _ = Describe("Metrics", func() {
 	var (
 		engine   *gin.Engine
 		database db.Database
@@ -101,7 +101,6 @@ var _ = Describe("Owners", func() {
 		NamespaceFactory(database, cluster.ID, "infrastructure")
 		OwnerFactory(database, cluster.ID, "tutum", "default")
 		OwnerFactory(database, cluster.ID, "falco", "infrastructure")
-
 	})
 
 	AfterEach(func() {
@@ -271,6 +270,48 @@ var _ = Describe("Owners", func() {
 			Expect(data).To(HaveLen(1))
 		})
 		It("Should return a 200 with different metrics depending of the period", func() {
+		})
+	})
+	Describe("indexMetrics()", func() {
+		It("Map per OwnerUID, per period and per metric", func() {
+			now := time.Now().UTC()
+			past := now.Add(time.Minute * -10)
+			var metrics []models.Metric
+			metric1 := MetricsFactory(database, cluster.ID, "owner1", models.MetricCPUUsed, 10, now)
+			metric1.Period = now
+			metric2 := MetricsFactory(database, cluster.ID, "owner1", models.MetricMemoryUsed, 100, now)
+			metric2.Period = now
+			metric3 := MetricsFactory(database, cluster.ID, "owner2", models.MetricMemoryUsed, 20, now)
+			metric3.Period = now
+			metric4 := MetricsFactory(database, cluster.ID, "owner2", models.MetricMemoryUsed, 200, past)
+			metric4.Period = past
+			metric5 := MetricsFactory(database, cluster.ID, "owner2", models.MetricMemoryUsed, 300, past)
+			metric5.Period = past
+			metrics = append(metrics, *metric1, *metric2, *metric3, *metric4, *metric5)
+			indexed := indexMetrics(&metrics)
+			// 1. First check the mapping per OwnerUID
+			Expect(*indexed).To(HaveLen(2))
+			Expect(*indexed).To(HaveKey("owner1"))
+			Expect(*indexed).To(HaveKey("owner2"))
+			// 2. Then check the mapping per Period
+			owner1 := (*indexed)["owner1"]
+			Expect(owner1).To(HaveLen(1))
+			Expect(owner1).To(HaveKey(now))
+			owner2 := (*indexed)["owner2"]
+			Expect(owner2).To(HaveLen(2))
+			Expect(owner2).To(HaveKey(now))
+			Expect(owner2).To(HaveKey(past))
+			// 3. Then check the mapping per Metric
+			owner1Now := (*indexed)["owner1"][now]
+			Expect(owner1Now).To(HaveLen(2))
+			Expect(owner1Now).To(HaveKey(models.MetricCPUUsed))
+			Expect(owner1Now).To(HaveKey(models.MetricMemoryUsed))
+			owner2Now := (*indexed)["owner2"][now]
+			Expect(owner2Now).To(HaveLen(1))
+			Expect(owner2Now).To(HaveKey(models.MetricMemoryUsed))
+			owner2Past := (*indexed)["owner2"][past]
+			Expect(owner2Past).To(HaveLen(1))
+			Expect(owner2Past).To(HaveKey(models.MetricMemoryUsed))
 		})
 	})
 })
