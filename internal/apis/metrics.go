@@ -85,7 +85,7 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 
 // List the metrics of the cluster within an interval
 func (handler *MetricsHandler) List(c *gin.Context) {
-	var owners []models.Owner
+	var owners []*models.Owner
 	// 1. Check sanity of the request
 	if !handler.ValidateRequest(c) {
 		return
@@ -111,7 +111,7 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 		Interval:   &interval,
 	}
 	handler.DB.Owners().FindAll(query, &owners)
-	GetOwnerUIDs := func(owners []models.Owner) []string {
+	GetOwnerUIDs := func(owners []*models.Owner) []string {
 		var uids []string
 		for _, owner := range owners {
 			uids = append(uids, owner.UID)
