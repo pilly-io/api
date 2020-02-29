@@ -37,7 +37,7 @@ func (handler *ClustersHandler) Create(c *gin.Context) {
 
 // List all the existing clusters
 func (handler *ClustersHandler) List(c *gin.Context) {
-	var clusters []models.Cluster
+	var clusters []*models.Cluster
 	query := db.Query{}
 
 	_, err := handler.DB.Clusters().FindAll(query, &clusters)
