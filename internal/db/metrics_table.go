@@ -19,8 +19,8 @@ func NewMetricsTable(client orm.Ormer, model models.Metric) *MetricsTable {
 }
 
 // FindAll returns all the metrics using an average on a specific period
-func (table *MetricsTable) FindAll(clusterID uint, ownerUIDs []string, period uint, queryInterval QueryInterval) (*[]models.Metric, error) {
-	var results []models.Metric
+func (table *MetricsTable) FindAll(clusterID uint, ownerUIDs []string, period uint, queryInterval QueryInterval) (*[]*models.Metric, error) {
+	var results []*models.Metric
 	if len(ownerUIDs) == 0 {
 		return nil, nil
 	}
