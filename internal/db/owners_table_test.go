@@ -1,4 +1,4 @@
-package db
+package db_test
 
 import (
 	"testing"
@@ -38,14 +38,38 @@ var _ = Describe("OwnersTable", func() {
 	})
 
 	Describe("ComputeResources()", func() {
-		It("Should just cast the owners without filtering", func() {
+		It("Should compute the resources for 2 owners", func() {
 			var owners []*models.Owner
 			var metrics []*models.Metric
 			owners = append(owners, tutumOwner, falcoOwner)
 			metrics = append(tutumMetrics, falcoMetrics...)
 			metricsIndexed := helpers.IndexMetrics(&metrics)
 			database.Owners().ComputeResources(&owners, metricsIndexed)
-			//2. Analyse the result
+			// Check the Resources field of the first owner
+			Expect(owners[0].Resources).To(HaveLen(1))
+			Expect(owners[0].Resources[0].ResourcesUsed).To(HaveKey("cpu"))
+			Expect(owners[0].Resources[0].ResourcesUsed).To(HaveKey("memory"))
+			Expect(owners[0].Resources[0].ResourcesRequested).To(HaveKey("cpu"))
+			Expect(owners[0].Resources[0].ResourcesRequested).To(HaveKey("memory"))
+			// Check the Resources field of the second owner
+			Expect(owners[1].Resources).To(HaveLen(1))
+			Expect(owners[1].Resources[0].ResourcesUsed).To(HaveKey("cpu"))
+			Expect(owners[1].Resources[0].ResourcesUsed).To(HaveKey("memory"))
+			Expect(owners[1].Resources[0].ResourcesRequested).To(HaveKey("cpu"))
+			Expect(owners[1].Resources[0].ResourcesRequested).To(HaveKey("memory"))
+		})
+		It("Should compute the resources for only 1 owner", func() {
+			var owners []*models.Owner
+			owners = append(owners, tutumOwner, falcoOwner)
+			metricsIndexed := helpers.IndexMetrics(&tutumMetrics)
+			database.Owners().ComputeResources(&owners, metricsIndexed)
+			// Check the Resources field of the first owner
+			Expect(owners[0].Resources[0].ResourcesUsed).To(HaveKey("cpu"))
+			Expect(owners[0].Resources[0].ResourcesUsed).To(HaveKey("memory"))
+			Expect(owners[0].Resources[0].ResourcesRequested).To(HaveKey("cpu"))
+			Expect(owners[0].Resources[0].ResourcesRequested).To(HaveKey("memory"))
+			// Check the Resources field of the second owner
+			Expect(owners[1].Resources).To(BeNil())
 		})
 	})
 })

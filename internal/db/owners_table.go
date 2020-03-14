@@ -31,7 +31,7 @@ func (table *OwnersTable) ComputeResources(owners *[]*models.Owner, metrics *mod
 					"cpu":    metric[models.MetricCPURequested],
 					"memory": metric[models.MetricMemoryRequested],
 				}
-				(*owners)[i].Metrics = append((*owners)[i].Metrics, resource)
+				(*owners)[i].Resources = append((*owners)[i].Resources, resource)
 			}
 		}
 	}

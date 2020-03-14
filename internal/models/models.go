@@ -72,7 +72,7 @@ type Metric struct {
 
 type Owner struct {
 	Model
-	Metrics   []Resources `orm:"-" json:"metrics;omitempty"`
+	Resources []Resources `orm:"-" json:"metrics;omitempty"`
 	UID       string      `orm:"column(uid)" json:"uid"`
 	Name      string      `json:"name"`
 	Type      string      `json:"type"`
