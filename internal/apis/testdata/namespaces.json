@@ -1,0 +1,15 @@
+[
+    {
+        "name": "infra",
+        "labels": {
+            "key1": "val1"
+        }
+    },
+    {
+        "name": "monitoring",
+        "labels": {
+            "key1": "val1",
+            "key2": "val2"
+        }
+    }
+]

@@ -55,9 +55,10 @@ type Node struct {
 
 type Namespace struct {
 	Model
-	Name string `json:"name"`
-	//Labels    postgres.Jsonb `json:"labels"`
-	ClusterID uint `orm:"column(cluster_id)" json:"cluster_id"`
+	Name           string                 `json:"name"`
+	Labels         map[string]interface{} `orm:"-" json:"labels"`
+	LabelsAsString string                 `orm:"type(jsonb);column(labels);null" json:"-"`
+	ClusterID      uint                   `orm:"column(cluster_id)" json:"cluster_id"`
 }
 
 type Metric struct {
@@ -105,4 +106,16 @@ func (node *Node) AfterLoad() {
 func (node *Node) BeforeSave() {
 	labelsStr, _ := json.Marshal(node.Labels)
 	node.LabelsAsString = string(labelsStr)
+}
+
+func (ns *Namespace) AfterLoad() {
+	var labels map[string]interface{}
+
+	json.Unmarshal([]byte(ns.LabelsAsString), &labels)
+	ns.Labels = labels
+}
+
+func (ns *Namespace) BeforeSave() {
+	labelsStr, _ := json.Marshal(ns.Labels)
+	ns.LabelsAsString = string(labelsStr)
 }

@@ -23,7 +23,9 @@ func SetupRouter(r *gin.Engine, database db.Database) {
 	collector := r.Group("/api/v1/collector")
 	collector.Use(middlewares.CluserAuthMiddleware(database.Clusters()))
 	nodes := NodesHandler{DB: database}
+	namespaces := NamespacesHandler{DB: database}
 	collector.POST("/nodes", nodes.Sync)
+	collector.POST("/namespaces", namespaces.Sync)
 }
 
 // ConvertTimestampToTime : convert a ts to a time
