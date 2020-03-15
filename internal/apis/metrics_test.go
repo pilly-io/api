@@ -44,7 +44,7 @@ var _ = Describe("Metrics", func() {
 		database.Flush()
 	})
 
-	Describe("ListMetrics() fails", func() {
+	Describe("ListOwners() fails", func() {
 		It("Should return a 404 as cluster does not exist", func() {
 			res := httptest.NewRecorder()
 

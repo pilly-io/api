@@ -13,7 +13,7 @@ type BeegoDatabase struct {
 	nodes      Table
 	metrics    *MetricsTable
 	owners     *OwnersTable
-	namespaces Table
+	namespaces *NamespacesTable
 }
 
 const dbAlias = "default"
@@ -31,7 +31,7 @@ func NewBeegoDatabase(uri string) *BeegoDatabase {
 	clusters := NewClusterTable(client, models.Cluster{})
 	nodes := NewBeegoTable(client, models.Node{})
 	metrics := NewMetricsTable(client, models.Metric{})
-	namespaces := NewBeegoTable(client, models.Namespace{})
+	namespaces := NewNamespacesTable(client, models.Namespace{})
 	owners := NewOwnersTable(client, models.Owner{})
 	return &BeegoDatabase{
 		&client,
@@ -69,7 +69,7 @@ func (db *BeegoDatabase) Owners() *OwnersTable {
 }
 
 // Namespaces returns the namespaces Table object
-func (db *BeegoDatabase) Namespaces() Table {
+func (db *BeegoDatabase) Namespaces() *NamespacesTable {
 	return db.namespaces
 }
 

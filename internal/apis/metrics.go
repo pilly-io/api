@@ -84,8 +84,8 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 	return true
 }
 
-// List the metrics of the cluster within an interval
-func (handler *MetricsHandler) List(c *gin.Context) {
+// ListOwners List the metrics of the cluster owners within an interval
+func (handler *MetricsHandler) ListOwners(c *gin.Context) {
 	var owners []*models.Owner
 	// 1. Check sanity of the request
 	if !handler.ValidateRequest(c) {
@@ -127,4 +127,33 @@ func (handler *MetricsHandler) List(c *gin.Context) {
 	handler.DB.Owners().ComputeResources(&owners, metricsIndexed)
 	//5. This is the end
 	c.JSON(http.StatusOK, ObjectToJSON(&owners))
+}
+
+// ListNamespaces List the metrics of the cluster namespaces within an interval
+func (handler *MetricsHandler) ListNamespaces(c *gin.Context) {
+	var namespaces []*models.Namespace
+	// 1. Check sanity of the request
+	if !handler.ValidateRequest(c) {
+		return
+	}
+	start := c.Value("Start").(time.Time)
+	end := c.Value("End").(time.Time)
+	clusterID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	period := c.Value("Period").(int64)
+
+	interval := db.QueryInterval{Start: start, End: end}
+	conditions := db.QueryConditions{"cluster_id": clusterID}
+
+	query := db.Query{
+		Conditions: conditions,
+		Interval:   &interval,
+	}
+	handler.DB.Namespaces().FindAll(query, &namespaces)
+	//3. Get the metrics within the interval grouped by period
+	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), nil, uint(period), interval)
+	metricsIndexed := helpers.IndexMetrics(metrics)
+	//4. Compute the owners resources
+	handler.DB.Namespaces().ComputeResources(&namespaces, metricsIndexed)
+	//5. This is the end
+	c.JSON(http.StatusOK, ObjectToJSON(&namespaces))
 }

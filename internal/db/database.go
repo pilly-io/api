@@ -32,6 +32,6 @@ type Database interface {
 	Nodes() Table
 	Metrics() *MetricsTable
 	Owners() *OwnersTable
-	Namespaces() Table
+	Namespaces() *NamespacesTable
 	Flush()
 }

@@ -18,7 +18,8 @@ func SetupRouter(r *gin.Engine, database db.Database) {
 	v1 := r.Group("/api/v1")
 	v1.POST("/clusters", clusters.Create)
 	v1.GET("/clusters", clusters.List)
-	v1.GET("/clusters/:id/owners/metrics", metrics.List)
+	v1.GET("/clusters/:id/owners/metrics", metrics.ListOwners)
+	v1.GET("/clusters/:id/namespaces/metrics", metrics.ListNamespaces)
 
 	collector := r.Group("/api/v1/collector")
 	collector.Use(middlewares.CluserAuthMiddleware(database.Clusters()))
