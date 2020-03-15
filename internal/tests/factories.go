@@ -13,6 +13,7 @@ func MetricsFactory(database db.Database, clusterID uint, ownerUID string, name 
 	metric := &models.Metric{
 		ClusterID: clusterID,
 		OwnerUID:  ownerUID,
+		Namespace: name,
 		Name:      name,
 		Value:     value,
 	}

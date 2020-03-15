@@ -65,6 +65,7 @@ type Namespace struct {
 type Metric struct {
 	Model
 	Name      string    `json:"metric_name"`
+	Namespace string    `orm:"column(namespace)" json:"namespace"`
 	Value     float64   `json:"metric_value"`
 	OwnerUID  string    `orm:"column(owner_uid)" json:"owner_uid"`
 	ClusterID uint      `orm:"column(cluster_id)" json:"cluster_id"`
