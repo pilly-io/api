@@ -74,15 +74,17 @@ type Metric struct {
 
 type Owner struct {
 	Model
-	Resources []Resources `orm:"-" json:"metrics;omitempty"`
-	UID       string      `orm:"column(uid)" json:"uid"`
-	Name      string      `json:"name"`
-	Type      string      `json:"type"`
-	Namespace string      `json:"namespace"`
-	//Labels    postgres.Jsonb `json:"labels"`
-	ClusterID uint `orm:"column(cluster_id)" json:"cluster_id"`
+	Resources      []Resources            `orm:"-" json:"metrics;omitempty"`
+	UID            string                 `orm:"column(uid)" json:"uid"`
+	Name           string                 `json:"name"`
+	Type           string                 `json:"type"`
+	Namespace      string                 `json:"namespace"`
+	Labels         map[string]interface{} `orm:"-" json:"labels"`
+	LabelsAsString string                 `orm:"type(jsonb);column(labels);null" json:"-"`
+	ClusterID      uint                   `orm:"column(cluster_id)" json:"cluster_id"`
 }
 
+// PersistedModel interface used by Tables to calls callback methods on models
 type PersistedModel interface {
 	AfterLoad()
 	BeforeSave()
@@ -93,11 +95,12 @@ func (object *Model) AfterLoad() {
 
 }
 
-// AfterLoad is called before saving object into DB
+// BeforeSave called before the object is saved (updated or created) in DB
 func (object *Model) BeforeSave() {
 
 }
 
+// AfterLoad is called after loading object from DB
 func (node *Node) AfterLoad() {
 	var labels map[string]interface{}
 
@@ -105,11 +108,13 @@ func (node *Node) AfterLoad() {
 	node.Labels = labels
 }
 
+// BeforeSave called before the object is saved (updated or created) in DB
 func (node *Node) BeforeSave() {
 	labelsStr, _ := json.Marshal(node.Labels)
 	node.LabelsAsString = string(labelsStr)
 }
 
+// AfterLoad is called after loading object from DB
 func (ns *Namespace) AfterLoad() {
 	var labels map[string]interface{}
 
@@ -117,7 +122,22 @@ func (ns *Namespace) AfterLoad() {
 	ns.Labels = labels
 }
 
+// BeforeSave called before the object is saved (updated or created) in DB
 func (ns *Namespace) BeforeSave() {
 	labelsStr, _ := json.Marshal(ns.Labels)
 	ns.LabelsAsString = string(labelsStr)
+}
+
+// AfterLoad is called after loading object from DB
+func (owner *Owner) AfterLoad() {
+	var labels map[string]interface{}
+
+	json.Unmarshal([]byte(owner.LabelsAsString), &labels)
+	owner.Labels = labels
+}
+
+// BeforeSave called before the object is saved (updated or created) in DB
+func (owner *Owner) BeforeSave() {
+	labelsStr, _ := json.Marshal(owner.Labels)
+	owner.LabelsAsString = string(labelsStr)
 }

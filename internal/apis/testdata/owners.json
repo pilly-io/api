@@ -1,0 +1,13 @@
+[
+    {
+        "uid": "816d2d42-4dd0-4e05-97eb-f077983b73dc",
+        "name": "Grafana",
+        "type": "deployment",
+        "created_at": "2020-03-17T18:43:00Z",
+        "namespace": "monitoring",
+        "labels": {
+            "key1": "val1",
+            "key2": "val2"
+        }
+    }
+]
