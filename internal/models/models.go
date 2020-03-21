@@ -150,3 +150,15 @@ func (owner *Owner) BeforeSave() {
 	labelsStr, _ := json.Marshal(owner.Labels)
 	owner.LabelsAsString = string(labelsStr)
 }
+
+// GetUID Depending the metric reference returns the owner or namespace UID
+func (metric *Metric) GetUID(refType string) string {
+	switch refType {
+	case "owner":
+		return metric.OwnerUID
+	case "namespace":
+		return metric.NamespaceUID
+	default:
+		return nil
+	}
+}
