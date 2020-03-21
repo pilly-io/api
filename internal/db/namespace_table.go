@@ -17,9 +17,9 @@ func NewNamespacesTable(client orm.Ormer, model models.Namespace) *NamespacesTab
 }
 
 //ComputeResources : Given metrics compute the owners resources
-func (table *NamespacesTable) ComputeResources(namespaces *[]*models.Namespace, metrics *models.IndexedMetrics) {
-	for i, namespace := range *namespaces {
-		if tmetric, exist := (*metrics)[namespace.Name]; exist {
+func (table *NamespacesTable) ComputeResources(objects *[]*models.Namespace, metrics *models.IndexedMetrics) {
+	for i, object := range *objects {
+		if tmetric, exist := (*metrics)[object.UID]; exist {
 			for timestamp, metric := range tmetric {
 				resource := models.Resources{}
 				resource.ResourcesTimestamp = timestamp
@@ -31,7 +31,7 @@ func (table *NamespacesTable) ComputeResources(namespaces *[]*models.Namespace, 
 					"cpu":    metric[models.MetricCPURequested],
 					"memory": metric[models.MetricMemoryRequested],
 				}
-				(*namespaces)[i].Resources = append((*namespaces)[i].Resources, resource)
+				(*objects)[i].Resources = append((*objects)[i].Resources, resource)
 			}
 		}
 	}

@@ -25,10 +25,12 @@ func MetricsFactory(database db.Database, clusterID uint, ownerUID string, name 
 //NamespaceFactory : create a namespace
 func NamespaceFactory(database db.Database, clusterID uint, name string) (*models.Namespace, []*models.Metric) {
 	var metrics []*models.Metric
+	uid, _ := uuid.NewRandom()
 	past := time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC)
 	namespace := &models.Namespace{
 		ClusterID: clusterID,
 		Name:      name,
+		UID:       uid.String(),
 	}
 	database.Namespaces().Insert(namespace)
 	// TODO convert into a []{}

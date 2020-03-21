@@ -17,9 +17,9 @@ func NewOwnersTable(client orm.Ormer, model models.Owner) *OwnersTable {
 }
 
 //ComputeResources : Given metrics compute the owners resources
-func (table *OwnersTable) ComputeResources(owners *[]*models.Owner, metrics *models.IndexedMetrics) {
-	for i, owner := range *owners {
-		if tmetric, exist := (*metrics)[owner.UID]; exist {
+func (table *OwnersTable) ComputeResources(objects *[]*models.Owner, metrics *models.IndexedMetrics) {
+	for i, object := range *objects {
+		if tmetric, exist := (*metrics)[object.UID]; exist {
 			for timestamp, metric := range tmetric {
 				resource := models.Resources{}
 				resource.ResourcesTimestamp = timestamp
@@ -31,7 +31,7 @@ func (table *OwnersTable) ComputeResources(owners *[]*models.Owner, metrics *mod
 					"cpu":    metric[models.MetricCPURequested],
 					"memory": metric[models.MetricMemoryRequested],
 				}
-				(*owners)[i].Resources = append((*owners)[i].Resources, resource)
+				(*objects)[i].Resources = append((*objects)[i].Resources, resource)
 			}
 		}
 	}
