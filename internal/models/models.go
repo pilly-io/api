@@ -56,6 +56,7 @@ type Node struct {
 type Namespace struct {
 	Model
 	Name           string                 `json:"name"`
+	UID            string                 `orm:"column(uid)" json:"uid"`
 	Resources      []Resources            `orm:"-" json:"metrics;omitempty"`
 	Labels         map[string]interface{} `orm:"-" json:"labels"`
 	LabelsAsString string                 `orm:"type(jsonb);column(labels);null" json:"-"`
