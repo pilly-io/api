@@ -102,6 +102,14 @@ func (object *Model) BeforeSave() {
 }
 
 // AfterLoad is called after loading object from DB
+func (cluster *Cluster) AfterLoad() {
+}
+
+// BeforeSave called before the object is saved (updated or created) in DB
+func (cluster *Cluster) BeforeSave() {
+}
+
+// AfterLoad is called after loading object from DB
 func (node *Node) AfterLoad() {
 	var labels map[string]interface{}
 

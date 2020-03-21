@@ -86,6 +86,7 @@ var _ = Describe("NamespacesHandler", func() {
 		It("should update current namespaces with new labels", func() {
 			currentNamespace := models.Namespace{
 				Name:      "monitoring",
+				UID:       "0238e796-9409-4152-a370-5d57a79ec6a6",
 				ClusterID: cluster.ID,
 				Labels: map[string]interface{}{
 					"key1": "oldVal",

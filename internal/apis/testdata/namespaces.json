@@ -1,11 +1,13 @@
 [
     {
+        "uid": "816d2d42-4dd0-4e05-97eb-f077983b73dc",
         "name": "infra",
         "labels": {
             "key1": "val1"
         }
     },
     {
+        "uid": "0238e796-9409-4152-a370-5d57a79ec6a6",
         "name": "monitoring",
         "labels": {
             "key1": "val1",

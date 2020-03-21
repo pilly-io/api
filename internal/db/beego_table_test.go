@@ -91,7 +91,7 @@ var _ = Describe("GormDatabase", func() {
 			query := db.Query{
 				Conditions: db.QueryConditions{"name": "cluster1"},
 			}
-			var results []models.Cluster
+			var results []*models.Cluster
 			table.FindAll(query, &results)
 
 			Expect(len(results)).To(Equal(1))
@@ -100,7 +100,7 @@ var _ = Describe("GormDatabase", func() {
 
 		It("returns all records if conditions", func() {
 			query := db.Query{}
-			var results []models.Cluster
+			var results []*models.Cluster
 			pagination, _ := table.FindAll(query, &results)
 
 			Expect(len(results)).To(Equal(3))
@@ -116,7 +116,7 @@ var _ = Describe("GormDatabase", func() {
 				OrderBy: "-name",
 				Limit:   1,
 			}
-			var results []models.Cluster
+			var results []*models.Cluster
 			table.FindAll(query, &results)
 
 			Expect(len(results)).To(Equal(1))
@@ -129,7 +129,7 @@ var _ = Describe("GormDatabase", func() {
 				Limit:   1,
 				Page:    2,
 			}
-			var results []models.Cluster
+			var results []*models.Cluster
 			pagination, _ := table.FindAll(query, &results)
 
 			Expect(len(results)).To(Equal(1))
@@ -139,15 +139,6 @@ var _ = Describe("GormDatabase", func() {
 			Expect(pagination.MaxPage).To(Equal(3))
 			Expect(pagination.TotalCount).To(Equal(3))
 			Expect(pagination.Limit).To(Equal(1))
-		})
-
-		PIt("returns error if invalid query", func() {
-			query := db.Query{
-				OrderBy: "fake",
-			}
-			var results []models.Cluster
-			_, err := table.FindAll(query, &results)
-			Expect(err).To(HaveOccurred())
 		})
 	})
 

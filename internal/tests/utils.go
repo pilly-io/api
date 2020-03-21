@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/astaxie/beego/orm"
 	"github.com/pilly-io/api/internal/db"
 )
 
@@ -33,7 +32,7 @@ func LoadFile(path string) []byte {
 // SetupDB connect database and returns it
 func SetupDB() db.Database {
 	database := db.NewBeegoDatabase(os.Getenv("PILLY_DB_URI"))
-	orm.Debug = true
+	//orm.Debug = true
 	database.Migrate()
 	return database
 }

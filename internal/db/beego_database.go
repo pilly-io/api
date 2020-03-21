@@ -45,7 +45,7 @@ func NewBeegoDatabase(uri string) *BeegoDatabase {
 
 // Migrate sync the schemas of the DB
 func (db *BeegoDatabase) Migrate() {
-	orm.RunSyncdb(dbAlias, true, true)
+	orm.RunSyncdb(dbAlias, true, false)
 }
 
 // Clusters returns the clusters Table object

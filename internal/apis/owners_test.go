@@ -65,7 +65,7 @@ var _ = Describe("OwnersHandler", func() {
 
 		It("should update current owners with new labels", func() {
 			currentOwner := models.Owner{
-				UID: "816d2d42-4dd0-4e05-97eb-f077983b73dc",
+				UID:       "816d2d42-4dd0-4e05-97eb-f077983b73dc",
 				Name:      "Grafana",
 				ClusterID: cluster.ID,
 				Labels: map[string]interface{}{

@@ -26,13 +26,13 @@ func (handler *NamespacesHandler) Sync(c *gin.Context) {
 	}
 
 	namespacesTable.FindAll(existingNamespacesQuery, &existingNamespaces)
-	existingNamespacesByName := indexNamespacesByName(&existingNamespaces)
-	namespacesByName := indexNamespacesByName(&namespaces)
+	existingNamespacesByUID := indexNamespacesByUID(&existingNamespaces)
+	namespacesByUID := indexNamespacesByUID(&namespaces)
 
-	// Merge namespaces infos beased on their name
+	// Merge namespaces infos beased on their UID
 	for _, namespace := range namespaces {
 		namespace.ClusterID = cluster.ID
-		existingNamespace, ok := existingNamespacesByName[namespace.Name]
+		existingNamespace, ok := existingNamespacesByUID[namespace.UID]
 		if ok {
 			existingNamespace.Labels = namespace.Labels
 			namespacesTable.Update(&existingNamespace)
@@ -47,7 +47,7 @@ func (handler *NamespacesHandler) Sync(c *gin.Context) {
 	// Mark namespaces as deleted if not received
 	namespaceIDsToDelete := make([]uint, 0)
 	for _, existingNamespace := range existingNamespaces {
-		if _, ok := namespacesByName[existingNamespace.Name]; ok == false {
+		if _, ok := namespacesByUID[existingNamespace.UID]; ok == false {
 			namespaceIDsToDelete = append(namespaceIDsToDelete, existingNamespace.ID)
 		}
 	}
@@ -62,10 +62,10 @@ func (handler *NamespacesHandler) Sync(c *gin.Context) {
 	c.JSON(http.StatusCreated, ObjectToJSON(nil))
 }
 
-func indexNamespacesByName(namespaces *[]*models.Namespace) map[string]models.Namespace {
-	namepsacesByName := make(map[string]models.Namespace)
+func indexNamespacesByUID(namespaces *[]*models.Namespace) map[string]models.Namespace {
+	namepsacesByUID := make(map[string]models.Namespace)
 	for _, namespace := range *namespaces {
-		namepsacesByName[namespace.Name] = *namespace
+		namepsacesByUID[namespace.UID] = *namespace
 	}
-	return namepsacesByName
+	return namepsacesByUID
 }

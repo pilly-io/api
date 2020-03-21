@@ -2,7 +2,6 @@ package apis
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -135,8 +134,7 @@ var _ = Describe("NodesHandler", func() {
 					"key1": "oldVal",
 				},
 			}
-			err := database.Nodes().Insert(&currentNode)
-			fmt.Println(err)
+			database.Nodes().Insert(&currentNode)
 
 			data := tests.LoadFile("testdata/nodes.json")
 			res := httptest.NewRecorder()
