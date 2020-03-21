@@ -20,10 +20,12 @@ func SetupRouter(r *gin.Engine, database db.Database) {
 
 	collectorGroup := r.Group("/api/v1/collector")
 	collectorGroup.Use(middlewares.CluserAuthMiddleware(database.Clusters()))
-	nodes := collector.NodesHandler{DB: database}
-	namespaces := collector.NamespacesHandler{DB: database}
-	owners := collector.OwnersHandler{DB: database}
-	collectorGroup.POST("/nodes", nodes.Sync)
-	collectorGroup.POST("/namespaces", namespaces.Sync)
-	collectorGroup.POST("/owners", owners.Sync)
+	collectorNodes := collector.NodesHandler{DB: database}
+	collectorNamespaces := collector.NamespacesHandler{DB: database}
+	collectorOwners := collector.OwnersHandler{DB: database}
+	collectorMetrics := collector.MetricsHandler{DB: database}
+	collectorGroup.POST("/nodes", collectorNodes.Sync)
+	collectorGroup.POST("/namespaces", collectorNamespaces.Sync)
+	collectorGroup.POST("/owners", collectorOwners.Sync)
+	collectorGroup.POST("/metrics", collectorMetrics.Create)
 }

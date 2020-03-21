@@ -5,6 +5,7 @@ type Table interface {
 	FindAll(query Query, results interface{}) (*PaginationInfo, error)
 	Exists(query Query) bool
 	Insert(value interface{}) error
+	BulkInsert(value interface{}) error
 	Count(query Query) int
 	Update(object interface{}) error
 	Delete(query Query, soft bool) (int64, error)

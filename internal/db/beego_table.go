@@ -10,6 +10,8 @@ import (
 	"github.com/pilly-io/api/internal/models"
 )
 
+const bulkInsertLimit = 100
+
 type BeegoTable struct {
 	client          orm.Ormer
 	kind            interface{}
@@ -47,6 +49,17 @@ func (table *BeegoTable) Exists(query Query) bool {
 func (table *BeegoTable) Insert(value interface{}) error {
 	value.(models.PersistedModel).BeforeSave()
 	_, err := table.client.Insert(value)
+	return err
+}
+
+// BulkInsert insert multiple records in one query
+func (table *BeegoTable) BulkInsert(value interface{}) error {
+	objects := reflect.Indirect(reflect.ValueOf(value))
+	for i := 0; i < objects.Len(); i++ {
+		model := objects.Index(i).Interface().(models.PersistedModel)
+		model.BeforeSave()
+	}
+	_, err := table.client.InsertMulti(bulkInsertLimit, value)
 	return err
 }
 

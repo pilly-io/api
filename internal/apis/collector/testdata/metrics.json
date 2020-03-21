@@ -1,0 +1,16 @@
+[
+    {
+        "owner_uid": "c5dea447-7914-40c2-9382-227c44731ee0",
+        "namespace_uid": "723d8295-50aa-49e7-a325-d72541539174",
+        "name": "cpu_used",
+        "value": 0.12,
+        "created_at": "2020-03-21T12:43:00Z"
+    },
+    {
+        "owner_uid": "3fa8c97e-6f97-49c4-a48c-e971de55224d",
+        "namespace_uid": "8f8d64bc-ec22-41e2-a3d7-b4b83776c2a1",
+        "name": "memory_used",
+        "value": 130.4,
+        "created_at": "2020-03-21T13:43:00Z"
+    }
+]

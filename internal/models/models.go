@@ -65,9 +65,9 @@ type Namespace struct {
 
 type Metric struct {
 	Model
-	Name         string    `json:"metric_name"`
+	Name         string    `json:"name"`
 	NamespaceUID string    `orm:"column(namespace_uid)" json:"namespace_uid"`
-	Value        float64   `json:"metric_value"`
+	Value        float64   `json:"value"`
 	OwnerUID     string    `orm:"column(owner_uid)" json:"owner_uid"`
 	ClusterID    uint      `orm:"column(cluster_id)" json:"cluster_id"`
 	Period       time.Time `orm:"-"`
@@ -92,22 +92,22 @@ type PersistedModel interface {
 }
 
 // AfterLoad is called after loading object from DB
-func (object *Model) AfterLoad() {
-
-}
+func (object *Model) AfterLoad() {}
 
 // BeforeSave called before the object is saved (updated or created) in DB
-func (object *Model) BeforeSave() {
-
-}
+func (object *Model) BeforeSave() {}
 
 // AfterLoad is called after loading object from DB
-func (cluster *Cluster) AfterLoad() {
-}
+func (cluster *Cluster) AfterLoad() {}
 
 // BeforeSave called before the object is saved (updated or created) in DB
-func (cluster *Cluster) BeforeSave() {
-}
+func (cluster *Cluster) BeforeSave() {}
+
+// AfterLoad is called after loading object from DB
+func (metric *Metric) AfterLoad() {}
+
+// BeforeSave called before the object is saved (updated or created) in DB
+func (metric *Metric) BeforeSave() {}
 
 // AfterLoad is called after loading object from DB
 func (node *Node) AfterLoad() {
