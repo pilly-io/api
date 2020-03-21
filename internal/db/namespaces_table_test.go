@@ -41,7 +41,7 @@ var _ = Describe("NamespacesTable", func() {
 			var metrics []*models.Metric
 			namespaces = append(namespaces, tutumNamespace, falcoNamespace)
 			metrics = append(tutumMetrics, falcoMetrics...)
-			metricsIndexed := helpers.IndexMetrics(&metrics)
+			metricsIndexed := helpers.IndexMetrics(&metrics, "namespace")
 			database.Namespaces().ComputeResources(&namespaces, metricsIndexed)
 			// Check the Resources field of the first namespace
 			Expect(namespaces[0].Resources).To(HaveLen(1))
@@ -59,7 +59,7 @@ var _ = Describe("NamespacesTable", func() {
 		It("Should compute the resources for only 1 namespace", func() {
 			var namespaces []*models.Namespace
 			namespaces = append(namespaces, tutumNamespace, falcoNamespace)
-			metricsIndexed := helpers.IndexMetrics(&tutumMetrics)
+			metricsIndexed := helpers.IndexMetrics(&tutumMetrics, "namespace")
 			database.Namespaces().ComputeResources(&namespaces, metricsIndexed)
 			// Check the Resources field of the first namespace
 			Expect(namespaces[0].Resources[0].ResourcesUsed).To(HaveKey("cpu"))

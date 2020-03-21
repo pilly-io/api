@@ -79,7 +79,7 @@ type Owner struct {
 	UID            string                 `orm:"column(uid)" json:"uid"`
 	Name           string                 `json:"name"`
 	Type           string                 `json:"type"`
-	Namespace      string                 `json:"namespace"`
+	NamespaceUID   string                 `orm:"column(namespace_uid)" json:"namespace_uid"`
 	Labels         map[string]interface{} `orm:"-" json:"labels"`
 	LabelsAsString string                 `orm:"type(jsonb);column(labels);null" json:"-"`
 	ClusterID      uint                   `orm:"column(cluster_id)" json:"cluster_id"`
@@ -159,6 +159,6 @@ func (metric *Metric) GetUID(refType string) string {
 	case "namespace":
 		return metric.NamespaceUID
 	default:
-		return nil
+		return ""
 	}
 }

@@ -43,7 +43,7 @@ var _ = Describe("OwnersTable", func() {
 			var metrics []*models.Metric
 			owners = append(owners, tutumOwner, falcoOwner)
 			metrics = append(tutumMetrics, falcoMetrics...)
-			metricsIndexed := helpers.IndexMetrics(&metrics)
+			metricsIndexed := helpers.IndexMetrics(&metrics, "owner")
 			database.Owners().ComputeResources(&owners, metricsIndexed)
 			// Check the Resources field of the first owner
 			Expect(owners[0].Resources).To(HaveLen(1))
@@ -61,7 +61,7 @@ var _ = Describe("OwnersTable", func() {
 		It("Should compute the resources for only 1 owner", func() {
 			var owners []*models.Owner
 			owners = append(owners, tutumOwner, falcoOwner)
-			metricsIndexed := helpers.IndexMetrics(&tutumMetrics)
+			metricsIndexed := helpers.IndexMetrics(&tutumMetrics, "owner")
 			database.Owners().ComputeResources(&owners, metricsIndexed)
 			// Check the Resources field of the first owner
 			Expect(owners[0].Resources[0].ResourcesUsed).To(HaveKey("cpu"))

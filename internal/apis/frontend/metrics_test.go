@@ -35,10 +35,10 @@ var _ = Describe("Metrics", func() {
 		engine = gin.New()
 		apis.SetupRouter(engine, database)
 		cluster, _ = database.Clusters().Create("test", "aws")
-		tests.NamespaceFactory(database, cluster.ID, "default")
-		tests.NamespaceFactory(database, cluster.ID, "infrastructure")
-		tests.OwnerFactory(database, cluster.ID, "tutum", "default")
-		tests.OwnerFactory(database, cluster.ID, "falco", "infrastructure")
+		defaultNS, _ := tests.NamespaceFactory(database, cluster.ID, "default")
+		infraNS, _ := tests.NamespaceFactory(database, cluster.ID, "infrastructure")
+		tests.OwnerFactory(database, cluster.ID, "tutum", defaultNS.UID)
+		tests.OwnerFactory(database, cluster.ID, "falco", infraNS.UID)
 	})
 
 	AfterEach(func() {
