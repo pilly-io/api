@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pilly-io/api/internal/apis"
+	"github.com/pilly-io/api/internal/apis/router"
 	idb "github.com/pilly-io/api/internal/db"
 	"github.com/sirupsen/logrus"
 	ginlogrus "github.com/toorop/gin-logrus"
@@ -26,6 +26,6 @@ func main() {
 		panic(err)
 	}
 	database.Migrate()
-	apis.SetupRouter(r, database)
+	router.SetupRouter(r, database)
 	r.Run()
 }
