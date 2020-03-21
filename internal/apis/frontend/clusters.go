@@ -1,10 +1,11 @@
-package apis
+package frontend
 
 import (
 	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pilly-io/api/internal/apis/utils"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
 )
@@ -25,12 +26,12 @@ func (handler *ClustersHandler) Create(c *gin.Context) {
 	if !handler.DB.Clusters().Exists(query) {
 		cluster, err := handler.DB.Clusters().Create(cluster.Name, cluster.Provider)
 		if err != nil {
-			c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON(err))
+			c.JSON(http.StatusUnprocessableEntity, utils.ErrorsToJSON(err))
 		} else {
-			c.JSON(http.StatusCreated, ObjectToJSON(&cluster))
+			c.JSON(http.StatusCreated, utils.ObjectToJSON(&cluster))
 		}
 	} else {
-		c.JSON(http.StatusConflict, ErrorsToJSON(errors.New("already_exist")))
+		c.JSON(http.StatusConflict, utils.ErrorsToJSON(errors.New("already_exist")))
 	}
 
 }

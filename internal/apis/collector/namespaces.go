@@ -1,9 +1,10 @@
-package apis
+package collector
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pilly-io/api/internal/apis/utils"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
 )
@@ -39,7 +40,7 @@ func (handler *NamespacesHandler) Sync(c *gin.Context) {
 		} else {
 			err := namespacesTable.Insert(namespace)
 			if err != nil {
-				c.AbortWithStatusJSON(http.StatusBadRequest, ErrorsToJSON(err))
+				c.AbortWithStatusJSON(http.StatusBadRequest, utils.ErrorsToJSON(err))
 			}
 		}
 	}
@@ -59,7 +60,7 @@ func (handler *NamespacesHandler) Sync(c *gin.Context) {
 		}, true)
 	}
 
-	c.JSON(http.StatusCreated, ObjectToJSON(nil))
+	c.JSON(http.StatusCreated, utils.ObjectToJSON(nil))
 }
 
 func indexNamespacesByUID(namespaces *[]*models.Namespace) map[string]models.Namespace {

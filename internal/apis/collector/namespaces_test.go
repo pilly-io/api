@@ -1,4 +1,4 @@
-package apis
+package collector
 
 import (
 	"bytes"

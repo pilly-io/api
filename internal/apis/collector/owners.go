@@ -1,9 +1,10 @@
-package apis
+package collector
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pilly-io/api/internal/apis/utils"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
 )
@@ -38,12 +39,12 @@ func (handler *OwnersHandler) Sync(c *gin.Context) {
 		} else {
 			err := ownersTable.Insert(owner)
 			if err != nil {
-				c.AbortWithStatusJSON(http.StatusBadRequest, ErrorsToJSON(err))
+				c.AbortWithStatusJSON(http.StatusBadRequest, utils.ErrorsToJSON(err))
 			}
 		}
 	}
 
-	c.JSON(http.StatusCreated, ObjectToJSON(nil))
+	c.JSON(http.StatusCreated, utils.ObjectToJSON(nil))
 }
 
 func indexOwnersByUID(owners *[]*models.Owner) map[string]models.Owner {

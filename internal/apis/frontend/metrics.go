@@ -1,4 +1,4 @@
-package apis
+package frontend
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pilly-io/api/internal/apis/utils"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/helpers"
 	"github.com/pilly-io/api/internal/models"
@@ -28,22 +29,22 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 		Conditions: db.QueryConditions{"id": clusterID},
 	}
 	if err != nil || !handler.DB.Clusters().Exists(query) {
-		c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("cluster_does_not_exist")))
+		c.JSON(http.StatusNotFound, utils.ErrorsToJSON(errors.New("cluster_does_not_exist")))
 		return false
 	}
-	start, err := ConvertTimestampToTime(c.Query("start"))
+	start, err := utils.ConvertTimestampToTime(c.Query("start"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_start")))
+		c.JSON(http.StatusBadRequest, utils.ErrorsToJSON(errors.New("invalid_start")))
 		return false
 	}
-	end, err := ConvertTimestampToTime(c.Query("end"))
+	end, err := utils.ConvertTimestampToTime(c.Query("end"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_end")))
+		c.JSON(http.StatusBadRequest, utils.ErrorsToJSON(errors.New("invalid_end")))
 		return false
 	}
 	period, err := strconv.ParseInt(c.DefaultQuery("period", string(MinPeriod)), 10, 64)
 	if err != nil || period < MinPeriod {
-		c.JSON(http.StatusBadRequest, ErrorsToJSON(errors.New("invalid_period")))
+		c.JSON(http.StatusBadRequest, utils.ErrorsToJSON(errors.New("invalid_period")))
 		return false
 	}
 	namespace := c.Query("namespace")
@@ -52,14 +53,14 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 			Conditions: db.QueryConditions{"cluster_id": clusterID, "name": namespace},
 		}
 		if !handler.DB.Namespaces().Exists(query) {
-			c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("namespace_does_not_exist")))
+			c.JSON(http.StatusNotFound, utils.ErrorsToJSON(errors.New("namespace_does_not_exist")))
 			return false
 		}
 		if c.Query("owners") != "" {
 			for _, owner := range strings.Split(c.Query("owners"), ",") {
 				details := strings.Split(owner, "/")
 				if len(details) == 2 {
-					kind := GetFullKindName(details[0])
+					kind := utils.GetFullKindName(details[0])
 					query = db.Query{
 						Conditions: db.QueryConditions{"cluster_id": clusterID, "namespace": namespace, "type": kind, "name": details[1]},
 					}
@@ -71,7 +72,7 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 				}
 			}
 			if len(ownerUIDs) == 0 {
-				c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("owners_do_not_exist")))
+				c.JSON(http.StatusNotFound, utils.ErrorsToJSON(errors.New("owners_do_not_exist")))
 				return false
 			}
 		}
@@ -126,7 +127,7 @@ func (handler *MetricsHandler) ListOwners(c *gin.Context) {
 	//4. Compute the owners resources
 	handler.DB.Owners().ComputeResources(&owners, metricsIndexed)
 	//5. This is the end
-	c.JSON(http.StatusOK, ObjectToJSON(&owners))
+	c.JSON(http.StatusOK, utils.ObjectToJSON(&owners))
 }
 
 // ListNamespaces List the metrics of the cluster namespaces within an interval
@@ -155,5 +156,5 @@ func (handler *MetricsHandler) ListNamespaces(c *gin.Context) {
 	//4. Compute the owners resources
 	handler.DB.Namespaces().ComputeResources(&namespaces, metricsIndexed)
 	//5. This is the end
-	c.JSON(http.StatusOK, ObjectToJSON(&namespaces))
+	c.JSON(http.StatusOK, utils.ObjectToJSON(&namespaces))
 }
