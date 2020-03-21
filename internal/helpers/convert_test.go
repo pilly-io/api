@@ -40,18 +40,18 @@ var _ = Describe("Convert", func() {
 			now := time.Now().UTC()
 			past := now.Add(time.Minute * -10)
 			var metrics []*models.Metric
-			metric1 := tests.MetricsFactory(database, cluster.ID, "owner1", models.MetricCPUUsed, 10, now)
+			metric1 := tests.MetricsFactory(database, cluster.ID, "owner1", "ns1", models.MetricCPUUsed, 10, now)
 			metric1.Period = now
-			metric2 := tests.MetricsFactory(database, cluster.ID, "owner1", models.MetricMemoryUsed, 100, now)
+			metric2 := tests.MetricsFactory(database, cluster.ID, "owner1", "ns1", models.MetricMemoryUsed, 100, now)
 			metric2.Period = now
-			metric3 := tests.MetricsFactory(database, cluster.ID, "owner2", models.MetricMemoryUsed, 20, now)
+			metric3 := tests.MetricsFactory(database, cluster.ID, "owner2", "ns1", models.MetricMemoryUsed, 20, now)
 			metric3.Period = now
-			metric4 := tests.MetricsFactory(database, cluster.ID, "owner2", models.MetricMemoryUsed, 200, past)
+			metric4 := tests.MetricsFactory(database, cluster.ID, "owner2", "ns1", models.MetricMemoryUsed, 200, past)
 			metric4.Period = past
-			metric5 := tests.MetricsFactory(database, cluster.ID, "owner2", models.MetricMemoryUsed, 300, past)
+			metric5 := tests.MetricsFactory(database, cluster.ID, "owner2", "ns1", models.MetricMemoryUsed, 300, past)
 			metric5.Period = past
 			metrics = append(metrics, metric1, metric2, metric3, metric4, metric5)
-			indexed := IndexMetrics(&metrics)
+			indexed := IndexMetrics(&metrics, "owner")
 			// 1. First check the mapping per OwnerUID
 			Expect(*indexed).To(HaveLen(2))
 			Expect(*indexed).To(HaveKey("owner1"))
