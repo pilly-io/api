@@ -1,7 +1,6 @@
 package db_test
 
 import (
-	"fmt"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -52,7 +51,6 @@ var _ = Describe("BeegoDatabase", func() {
 				Conditions: db.QueryConditions{"name": "cluster2"},
 			}
 			err := table.Find(query, &result)
-			fmt.Println(err)
 			Expect(err).To(HaveOccurred())
 		})
 	})
