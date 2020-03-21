@@ -19,31 +19,35 @@ func NewMetricsTable(client orm.Ormer, model models.Metric) *MetricsTable {
 }
 
 // FindAll returns all the metrics using an average on a specific period
-func (table *MetricsTable) FindAll(clusterID uint, ownerUIDs []string, period uint, queryInterval QueryInterval) (*[]*models.Metric, error) {
+func (table *MetricsTable) FindAll(clusterID uint, refType string, refUIDs []string, period uint, queryInterval QueryInterval) (*[]*models.Metric, error) {
+	refColumns := map[string]string{
+		"owner":     "owner_uid",
+		"namespace": "namespace_uid",
+	}
 	var results []*models.Metric
-	if len(ownerUIDs) == 0 {
+	if len(refUIDs) == 0 {
 		return nil, nil
 	}
-	ownerUIDsMarks := ""
-	for index := range ownerUIDs {
+	UIDsMarks := ""
+	for index := range refUIDs {
 		if index == 0 {
-			ownerUIDsMarks += "?"
+			UIDsMarks += "?"
 		} else {
-			ownerUIDsMarks += " , ?"
+			UIDsMarks += " , ?"
 		}
 	}
 
 	query := fmt.Sprintf(`
-	SELECT AVG(value) as value, name, owner_uid, cluster_id,
+	SELECT AVG(value) as value, name, %s, cluster_id,
 	to_timestamp(floor((extract('epoch' from created_at) / ? )) * ?)  AT TIME ZONE 'UTC' as period
 	FROM metric
 	WHERE cluster_id = ?
-	AND owner_uid IN(%s)
+	AND %s IN(%s)
 	AND created_at <= ?
 	AND (deleted_at IS NULL or deleted_at >= ?)
-	GROUP BY name, period, owner_uid, cluster_id
-	`, ownerUIDsMarks)
+	GROUP BY name, period, %s, cluster_id
+	`, refColumns[refType], refColumns[refType], UIDsMarks, refColumns[refType])
 
-	_, err := table.client.Raw(query, period, period, clusterID, ownerUIDs, queryInterval.End, queryInterval.Start).QueryRows(&results)
+	_, err := table.client.Raw(query, period, period, clusterID, refUIDs, queryInterval.End, queryInterval.Start).QueryRows(&results)
 	return &results, err
 }

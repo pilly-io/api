@@ -124,7 +124,7 @@ func (handler *MetricsHandler) ListOwners(c *gin.Context) {
 	}
 	ownerUIDs = GetOwnerUIDs(owners)
 	//3. Get the metrics within the interval grouped by period
-	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), ownerUIDs, uint(period), interval)
+	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), "owner", ownerUIDs, uint(period), interval)
 	metricsIndexed := helpers.IndexMetrics(metrics, "owner")
 	//4. Compute the owners resources
 	handler.DB.Owners().ComputeResources(&owners, metricsIndexed)
@@ -152,8 +152,16 @@ func (handler *MetricsHandler) ListNamespaces(c *gin.Context) {
 		Interval:   &interval,
 	}
 	handler.DB.Namespaces().FindAll(query, &namespaces)
+	GetNamespaceUIDs := func(namespaces []*models.Namespace) []string {
+		var uids []string
+		for _, namespace := range namespaces {
+			uids = append(uids, namespace.UID)
+		}
+		return uids
+	}
+	namespaceUIDs := GetNamespaceUIDs(namespaces)
 	//3. Get the metrics within the interval grouped by period
-	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), nil, uint(period), interval)
+	metrics, _ := handler.DB.Metrics().FindAll(uint(clusterID), "namespace", namespaceUIDs, uint(period), interval)
 	metricsIndexed := helpers.IndexMetrics(metrics, "namespace")
 	//4. Compute the owners resources
 	handler.DB.Namespaces().ComputeResources(&namespaces, metricsIndexed)

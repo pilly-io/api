@@ -141,7 +141,7 @@ var _ = Describe("Metrics", func() {
 			Expect(errors[0]).To(Equal("invalid_period"))
 		})
 	})
-	Describe("ListMetrics() succeeds", func() {
+	Describe("ListOwners() succeeds", func() {
 		It("Should return a 200 without the metrics of all the cluster", func() {
 			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
@@ -207,6 +207,126 @@ var _ = Describe("Metrics", func() {
 			json.Unmarshal(res.Body.Bytes(), &payload)
 			data := payload["data"].([]interface{})
 			Expect(data).To(HaveLen(1))
+		})
+		It("Should return a 200 with different metrics depending of the period", func() {
+		})
+	})
+	Describe("ListNamespaces() fails", func() {
+		It("Should return a 404 as cluster does not exist", func() {
+			res := httptest.NewRecorder()
+
+			//1. Create the GET request
+			url := fmt.Sprintf("/api/v1/clusters/xxx/namespaces/metrics")
+			req, _ := http.NewRequest("GET", url, nil)
+			engine.ServeHTTP(res, req)
+
+			//2. Analyse the result
+			Expect(res.Code).To(Equal(404))
+		})
+		It("Should return a 400 as start is not defined", func() {
+			res := httptest.NewRecorder()
+
+			//1. Create the GET request
+			url := fmt.Sprintf("/api/v1/clusters/%d/namespaces/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
+			engine.ServeHTTP(res, req)
+
+			//2. Analyse the result
+			Expect(res.Code).To(Equal(400))
+		})
+		It("Should return a 400 as start is an invalid timestamp", func() {
+			var payload utils.JsonFormat
+			res := httptest.NewRecorder()
+
+			//1. Create the GET request
+			url := fmt.Sprintf("/api/v1/clusters/%d/namespaces/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
+			q := req.URL.Query()
+			q.Add("start", "start")
+			req.URL.RawQuery = q.Encode()
+			engine.ServeHTTP(res, req)
+
+			//2. Analyse the result
+			Expect(res.Code).To(Equal(400))
+			json.Unmarshal(res.Body.Bytes(), &payload)
+			errors := payload["errors"].([]interface{})
+			Expect(errors[0]).To(Equal("invalid_start"))
+		})
+		It("Should return a 400 as end is not defined", func() {
+			res := httptest.NewRecorder()
+
+			//1. Create the GET request
+			url := fmt.Sprintf("/api/v1/clusters/%d/namespaces/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
+			q := req.URL.Query()
+			q.Add("start", "1")
+			req.URL.RawQuery = q.Encode()
+			engine.ServeHTTP(res, req)
+
+			//2. Analyse the result
+			Expect(res.Code).To(Equal(400))
+		})
+		It("Should return a 400 as end is an invalid timestamp", func() {
+			var payload utils.JsonFormat
+			res := httptest.NewRecorder()
+
+			//1. Create the GET request
+			url := fmt.Sprintf("/api/v1/clusters/%d/namespaces/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
+			q := req.URL.Query()
+			q.Add("start", "1")
+			q.Add("end", "end")
+			req.URL.RawQuery = q.Encode()
+			engine.ServeHTTP(res, req)
+
+			//2. Analyse the result
+			Expect(res.Code).To(Equal(400))
+			json.Unmarshal(res.Body.Bytes(), &payload)
+			errors := payload["errors"].([]interface{})
+			Expect(errors[0]).To(Equal("invalid_end"))
+		})
+		It("Should return a 400 as period is invalid", func() {
+			var payload utils.JsonFormat
+			res := httptest.NewRecorder()
+
+			//1. Create the GET request
+			url := fmt.Sprintf("/api/v1/clusters/%d/namespaces/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
+			q := req.URL.Query()
+			q.Add("start", "1")
+			q.Add("end", "2")
+			q.Add("period", "3")
+			req.URL.RawQuery = q.Encode()
+			engine.ServeHTTP(res, req)
+
+			//2. Analyse the result
+			Expect(res.Code).To(Equal(400))
+			json.Unmarshal(res.Body.Bytes(), &payload)
+			errors := payload["errors"].([]interface{})
+			Expect(errors[0]).To(Equal("invalid_period"))
+		})
+	})
+	Describe("ListNamespaces() succeeds", func() {
+		It("Should return a 200 without the metrics of all the namespaces", func() {
+			var payload utils.JsonFormat
+			res := httptest.NewRecorder()
+			now := time.Now().Unix()
+
+			//2. Create the GET request
+			url := fmt.Sprintf("/api/v1/clusters/%d/namespaces/metrics", cluster.ID)
+			req, _ := http.NewRequest("GET", url, nil)
+			q := req.URL.Query()
+			q.Add("start", "1000")
+			q.Add("end", fmt.Sprintf("%d", now))
+			q.Add("period", "180")
+			req.URL.RawQuery = q.Encode()
+			engine.ServeHTTP(res, req)
+
+			//3. Analyse the result
+			Expect(res.Code).To(Equal(200))
+			json.Unmarshal(res.Body.Bytes(), &payload)
+			data := payload["data"].([]interface{})
+			Expect(data).To(HaveLen(0))
 		})
 		It("Should return a 200 with different metrics depending of the period", func() {
 		})
