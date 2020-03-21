@@ -43,8 +43,8 @@ func (handler *ClustersHandler) List(c *gin.Context) {
 
 	_, err := handler.DB.Clusters().FindAll(query, &clusters)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, ErrorsToJSON(err))
+		c.JSON(http.StatusUnprocessableEntity, utils.ErrorsToJSON(err))
 	} else {
-		c.JSON(http.StatusOK, ObjectToJSON(&clusters))
+		c.JSON(http.StatusOK, utils.ObjectToJSON(&clusters))
 	}
 }

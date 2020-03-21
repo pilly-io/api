@@ -1,6 +1,7 @@
 package db_test
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -15,7 +16,7 @@ func TestTable(t *testing.T) {
 	RunSpecs(t, "Table Suite")
 }
 
-var _ = Describe("GormDatabase", func() {
+var _ = Describe("BeegoDatabase", func() {
 	var (
 		database db.Database
 		table    db.Table
@@ -23,6 +24,10 @@ var _ = Describe("GormDatabase", func() {
 	BeforeEach(func() {
 		database = tests.GetDB()
 		table = database.Clusters()
+	})
+
+	AfterEach(func() {
+		database.Flush()
 	})
 
 	Describe("Find()", func() {
@@ -47,6 +52,7 @@ var _ = Describe("GormDatabase", func() {
 				Conditions: db.QueryConditions{"name": "cluster2"},
 			}
 			err := table.Find(query, &result)
+			fmt.Println(err)
 			Expect(err).To(HaveOccurred())
 		})
 	})

@@ -1,4 +1,4 @@
-package frontend
+package frontend_test
 
 import (
 	"encoding/json"
@@ -11,7 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pilly-io/api/internal/apis"
+	"github.com/pilly-io/api/internal/apis/router"
+	"github.com/pilly-io/api/internal/apis/utils"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
 	"github.com/pilly-io/api/internal/tests"
@@ -33,7 +34,7 @@ var _ = Describe("Metrics", func() {
 		database = tests.GetDB()
 		gin.SetMode(gin.TestMode)
 		engine = gin.New()
-		apis.SetupRouter(engine, database)
+		router.SetupRouter(engine, database)
 		cluster, _ = database.Clusters().Create("test", "aws")
 		defaultNS, _ := tests.NamespaceFactory(database, cluster.ID, "default")
 		infraNS, _ := tests.NamespaceFactory(database, cluster.ID, "infrastructure")
@@ -69,7 +70,7 @@ var _ = Describe("Metrics", func() {
 			Expect(res.Code).To(Equal(400))
 		})
 		It("Should return a 400 as start is an invalid timestamp", func() {
-			var payload jsonFormat
+			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
@@ -101,7 +102,7 @@ var _ = Describe("Metrics", func() {
 			Expect(res.Code).To(Equal(400))
 		})
 		It("Should return a 400 as end is an invalid timestamp", func() {
-			var payload jsonFormat
+			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
@@ -120,7 +121,7 @@ var _ = Describe("Metrics", func() {
 			Expect(errors[0]).To(Equal("invalid_end"))
 		})
 		It("Should return a 400 as period is invalid", func() {
-			var payload jsonFormat
+			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
 
 			//1. Create the GET request
@@ -142,7 +143,7 @@ var _ = Describe("Metrics", func() {
 	})
 	Describe("ListMetrics() succeeds", func() {
 		It("Should return a 200 without the metrics of all the cluster", func() {
-			var payload jsonFormat
+			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
 
@@ -163,7 +164,7 @@ var _ = Describe("Metrics", func() {
 			Expect(data).To(HaveLen(2))
 		})
 		It("Should return a 200 without the metrics of a namespace", func() {
-			var payload jsonFormat
+			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
 
@@ -185,7 +186,7 @@ var _ = Describe("Metrics", func() {
 			Expect(data).To(HaveLen(1))
 		})
 		It("Should return a 200 without the metrics of an owner", func() {
-			var payload jsonFormat
+			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
 			now := time.Now().Unix()
 

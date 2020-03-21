@@ -36,7 +36,7 @@ func LoadFile(path string) []byte {
 // GetDB connect database and returns it
 func GetDB() db.Database {
 	if database == nil {
-		database := db.NewBeegoDatabase(os.Getenv("PILLY_DB_URI"))
+		database = db.NewBeegoDatabase(os.Getenv("PILLY_DB_URI"))
 		//orm.Debug = true
 		database.Migrate()
 	}

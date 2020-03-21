@@ -55,7 +55,7 @@ func (handler *MetricsHandler) ValidateRequest(c *gin.Context) bool {
 		}
 		err := handler.DB.Namespaces().Find(query, &namespace)
 		if err != nil {
-			c.JSON(http.StatusNotFound, ErrorsToJSON(errors.New("namespace_does_not_exist")))
+			c.JSON(http.StatusNotFound, utils.ErrorsToJSON(errors.New("namespace_does_not_exist")))
 			return false
 		}
 		if c.Query("owners") != "" {

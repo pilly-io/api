@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type jsonFormat = map[string]interface{}
+type JsonFormat = map[string]interface{}
 
 // ConvertTimestampToTime : convert a ts to a time
 func ConvertTimestampToTime(ts string) (*time.Time, error) {
@@ -23,20 +23,20 @@ func ErrorsToJSON(errors ...error) map[string]interface{} {
 	for _, e := range errors {
 		errorsString = append(errorsString, e.Error())
 	}
-	return jsonFormat{
+	return JsonFormat{
 		"errors": errorsString,
 	}
 }
 
 //ObjectToJSON returns JSON format for the data
 func ObjectToJSON(object interface{}) map[string]interface{} {
-	return jsonFormat{
+	return JsonFormat{
 		"data": object,
 	}
 }
 
 /*func PaginatedObjectToJSON(collection db.PaginationInfo) map[string]interface{} {
-	return jsonFormat{
+	return JsonFormat{
 		"data": collection.Objects,
 		"pagination": {
 			"current":     collection.CurrentPage,

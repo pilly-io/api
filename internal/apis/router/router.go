@@ -1,7 +1,8 @@
-package apis
+package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/pilly-io/api/internal/apis/collector"
 	"github.com/pilly-io/api/internal/apis/frontend"
 	"github.com/pilly-io/api/internal/apis/middlewares"
 	"github.com/pilly-io/api/internal/db"
@@ -17,12 +18,12 @@ func SetupRouter(r *gin.Engine, database db.Database) {
 	v1.GET("/clusters/:id/owners/metrics", metrics.ListOwners)
 	v1.GET("/clusters/:id/namespaces/metrics", metrics.ListNamespaces)
 
-	collector := r.Group("/api/v1/collector")
-	collector.Use(middlewares.CluserAuthMiddleware(database.Clusters()))
+	collectorGroup := r.Group("/api/v1/collector")
+	collectorGroup.Use(middlewares.CluserAuthMiddleware(database.Clusters()))
 	nodes := collector.NodesHandler{DB: database}
 	namespaces := collector.NamespacesHandler{DB: database}
 	owners := collector.OwnersHandler{DB: database}
-	collector.POST("/nodes", nodes.Sync)
-	collector.POST("/namespaces", namespaces.Sync)
-	collector.POST("/owners", owners.Sync)
+	collectorGroup.POST("/nodes", nodes.Sync)
+	collectorGroup.POST("/namespaces", namespaces.Sync)
+	collectorGroup.POST("/owners", owners.Sync)
 }

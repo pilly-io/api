@@ -1,4 +1,4 @@
-package frontend
+package frontend_test
 
 import (
 	"bytes"
@@ -10,7 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pilly-io/api/internal/apis"
+	"github.com/pilly-io/api/internal/apis/router"
+	"github.com/pilly-io/api/internal/apis/utils"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
 	"github.com/pilly-io/api/internal/tests"
@@ -31,7 +32,7 @@ var _ = Describe("Clusters", func() {
 		database = tests.GetDB()
 		gin.SetMode(gin.TestMode)
 		engine = gin.New()
-		apis.SetupRouter(engine, database)
+		router.SetupRouter(engine, database)
 	})
 
 	AfterEach(func() {
@@ -40,7 +41,7 @@ var _ = Describe("Clusters", func() {
 
 	Describe("Create()", func() {
 		It("Should create a record and returns a 201", func() {
-			var payload jsonFormat
+			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
 
 			//1. Create the POST request
@@ -55,7 +56,7 @@ var _ = Describe("Clusters", func() {
 			Expect(payload["data"]).To(HaveKeyWithValue("provider", "aws"))
 		})
 		It("Should fails because the record already exist", func() {
-			var payload jsonFormat
+			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
 			cluster1 := models.Cluster{Name: "cluster1"}
 			database.Clusters().Insert(&cluster1)
@@ -73,7 +74,7 @@ var _ = Describe("Clusters", func() {
 	})
 	Describe("List()", func() {
 		It("Should get all the clusters and return 200", func() {
-			var payload jsonFormat
+			var payload utils.JsonFormat
 			res := httptest.NewRecorder()
 			cluster1 := models.Cluster{Name: "cluster1"}
 			database.Clusters().Insert(&cluster1)

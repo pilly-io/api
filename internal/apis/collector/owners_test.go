@@ -1,4 +1,4 @@
-package collector
+package collector_test
 
 import (
 	"bytes"
@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pilly-io/api/internal/apis"
 	"github.com/pilly-io/api/internal/apis/middlewares"
+	"github.com/pilly-io/api/internal/apis/router"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
 	"github.com/pilly-io/api/internal/tests"
@@ -32,7 +32,7 @@ var _ = Describe("OwnersHandler", func() {
 		database = tests.GetDB()
 		gin.SetMode(gin.TestMode)
 		engine = gin.New()
-		apis.SetupRouter(engine, database)
+		router.SetupRouter(engine, database)
 		cluster, _ = database.Clusters().Create("test", "aws")
 	})
 
