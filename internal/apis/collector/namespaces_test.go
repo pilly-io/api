@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pilly-io/api/internal/apis"
 	"github.com/pilly-io/api/internal/apis/middlewares"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
@@ -28,10 +29,10 @@ var _ = Describe("NamespacesHandler", func() {
 	)
 
 	BeforeEach(func() {
-		database = tests.SetupDB()
+		database = tests.GetDB()
 		gin.SetMode(gin.TestMode)
 		engine = gin.New()
-		SetupRouter(engine, database)
+		apis.SetupRouter(engine, database)
 		cluster, _ = database.Clusters().Create("test", "aws")
 	})
 

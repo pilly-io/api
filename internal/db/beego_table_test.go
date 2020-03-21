@@ -21,7 +21,7 @@ var _ = Describe("GormDatabase", func() {
 		table    db.Table
 	)
 	BeforeEach(func() {
-		database = tests.SetupDB()
+		database = tests.GetDB()
 		table = database.Clusters()
 	})
 

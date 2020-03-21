@@ -25,7 +25,7 @@ var _ = Describe("OwnersTable", func() {
 	)
 
 	BeforeEach(func() {
-		database = tests.SetupDB()
+		database = tests.GetDB()
 		cluster, _ = database.Clusters().Create("test", "aws")
 		tests.NamespaceFactory(database, cluster.ID, "default")
 		tests.NamespaceFactory(database, cluster.ID, "infrastructure")

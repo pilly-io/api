@@ -25,7 +25,7 @@ var _ = Describe("NamespacesTable", func() {
 	)
 
 	BeforeEach(func() {
-		database = tests.SetupDB()
+		database = tests.GetDB()
 		cluster, _ = database.Clusters().Create("test", "aws")
 		tutumNamespace, tutumMetrics = tests.NamespaceFactory(database, cluster.ID, "default")
 		falcoNamespace, falcoMetrics = tests.NamespaceFactory(database, cluster.ID, "infrastructure")

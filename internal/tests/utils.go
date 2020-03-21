@@ -8,6 +8,10 @@ import (
 	"github.com/pilly-io/api/internal/db"
 )
 
+var (
+	database *db.BeegoDatabase
+)
+
 // LoadJSON returns list or map contained in file at `path`
 func LoadJSON(path string) interface{} {
 	byteValue := LoadFile(path)
@@ -29,10 +33,12 @@ func LoadFile(path string) []byte {
 	return byteValue
 }
 
-// SetupDB connect database and returns it
-func SetupDB() db.Database {
-	database := db.NewBeegoDatabase(os.Getenv("PILLY_DB_URI"))
-	//orm.Debug = true
-	database.Migrate()
+// GetDB connect database and returns it
+func GetDB() db.Database {
+	if database == nil {
+		database := db.NewBeegoDatabase(os.Getenv("PILLY_DB_URI"))
+		//orm.Debug = true
+		database.Migrate()
+	}
 	return database
 }
