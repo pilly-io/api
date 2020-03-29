@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pilly-io/api/internal/apis/router"
-	idb "github.com/pilly-io/api/internal/db"
+	"github.com/pilly-io/api/internal/db"
 	"github.com/sirupsen/logrus"
 	ginlogrus "github.com/toorop/gin-logrus"
 )
@@ -21,10 +21,7 @@ func main() {
 	log := logrus.New()
 	r.Use(ginlogrus.Logger(log), gin.Recovery())
 
-	database, err := idb.New("sqlite3", "/tmp/pilly.sqlite")
-	if err != nil {
-		panic(err)
-	}
+	database := db.NewBeegoDatabase("")
 	database.Migrate()
 	router.SetupRouter(r, database)
 	r.Run()

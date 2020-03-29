@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pilly-io/api/internal/db"
 	"github.com/pilly-io/api/internal/models"
+	"github.com/pilly-io/api/internal/tests"
 )
 
 func TestClustersAuth(t *testing.T) {
@@ -24,11 +25,11 @@ var _ = Describe("ClustersAuth", func() {
 		called          bool
 		cluster         *models.Cluster
 		receivedCluster *models.Cluster
+		database        db.Database
 	)
 	BeforeEach(func() {
 		called = false
-		database, _ := db.New("sqlite3", ":memory:")
-		database.Migrate()
+		database = tests.GetDB()
 		cluster = &models.Cluster{
 			Name:     "cluster1",
 			APIToken: "1234567",
