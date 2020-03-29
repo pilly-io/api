@@ -114,7 +114,7 @@ func (handler *UsageHandler) ByOwners(c *gin.Context) {
 	//}
 	//ownerUIDs = GetOwnerUIDs(owners)
 	//3. Get the metrics within the interval grouped by period
-	//metrics, _ := handler.DB.Metrics().FindAllByPeriod(uint(clusterID), "owner", ownerUIDs, uint(period), interval)
+	//metrics, _ := handler.DB.Metrics().FindMetricsByInterval(uint(clusterID), "owner", ownerUIDs, uint(period), interval)
 	//metricsIndexed := helpers.IndexMetrics(metrics, "owner")
 	//4. Compute the owners resources
 	//handler.DB.Owners().ComputeResources(&owners, metricsIndexed)
@@ -142,8 +142,8 @@ func (handler *UsageHandler) ByCluster(c *gin.Context) {
 	}
 	handler.DB.Clusters().Find(query, &cluster)
 
-	//3. Get the metrics within the interval grouped by period
-	//metrics, _ := handler.DB.Metrics().FindAllByPeriod(uint(clusterID), "namespace", namespaceUIDs, uint(period), interval)
+	//3. Get the usage within the interval grouped by period
+	//metrics, _ := handler.DB.Metrics().FindUsageByInterval(uint(clusterID), nil, interval)
 	//metricsIndexed := helpers.IndexMetrics(metrics, "namespace")
 	//4. Compute the owners resources
 	//handler.DB.Namespaces().ComputeResources(&namespaces, metricsIndexed)

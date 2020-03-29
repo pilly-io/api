@@ -18,8 +18,8 @@ func NewMetricsTable(client orm.Ormer, model models.Metric) *MetricsTable {
 	return &MetricsTable{table}
 }
 
-// FindAllByPeriod returns all the metrics using an average on a specific period
-func (table *MetricsTable) FindAllByPeriod(clusterID uint, refType string, refUIDs []string, period uint, queryInterval QueryInterval) (*[]*models.Metric, error) {
+// FindMetricsByInterval returns all the metrics using an average on a specific period
+func (table *MetricsTable) FindMetricsByInterval(clusterID uint, refType string, refUIDs []string, period uint, queryInterval QueryInterval) (*[]*models.Metric, error) {
 	refColumns := map[string]string{
 		"owner":     "owner_uid",
 		"namespace": "namespace_uid",
